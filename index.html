@@ -1,15 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NailDesk â€” GestiÃ³n de SalÃ³n</title>
+  <title>NailDesk — Gestión de Salón</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -51,7 +50,7 @@
             </svg>
           </div>
           <h2>Tu negocio,<br>tu control</h2>
-          <p>Gestiona costos, inventario, precios y ventas de tu salÃ³n de uÃ±as en un solo lugar.</p>
+          <p>Gestiona costos, inventario, precios y ventas de tu salón de uñas en un solo lugar.</p>
           <div class="mt-8 flex justify-center gap-3">
             <div class="w-2 h-2 rounded-full bg-white/30"></div>
             <div class="w-2 h-2 rounded-full bg-white/60"></div>
@@ -71,13 +70,13 @@
           </div>
           <div class="mb-8 hidden lg:block">
             <h1 class="font-display text-2xl font-bold mb-1" style="color:var(--charcoal)">Bienvenida de nuevo</h1>
-            <p class="text-sm" style="color:var(--terracota-400)">Inicia sesiÃ³n para continuar</p>
+            <p class="text-sm" style="color:var(--terracota-400)">Inicia sesión para continuar</p>
           </div>
 
           <div class="bg-white rounded-2xl p-6 shadow-xl border border-terracota-100/50">
             <div class="flex mb-6 bg-terracota-50 rounded-xl p-1">
               <button id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-terracota-600 shadow-sm transition-all">
-                Iniciar SesiÃ³n
+                Iniciar Sesión
               </button>
               <button id="tab-register" class="flex-1 py-2.5 text-sm font-semibold rounded-lg text-gray-400 transition-all">
                 Crear Cuenta
@@ -86,12 +85,12 @@
 
             <form id="login-form" class="space-y-4">
               <div>
-                <label class="form-label">Correo electrÃ³nico</label>
+                <label class="form-label">Correo electrónico</label>
                 <input type="email" id="login-email" required class="form-input" placeholder="tu@email.com">
               </div>
               <div>
-                <label class="form-label">ContraseÃ±a</label>
-                <input type="password" id="login-password" required class="form-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                <label class="form-label">Contraseña</label>
+                <input type="password" id="login-password" required class="form-input" placeholder="••••••••">
               </div>
               <button type="submit" class="btn btn-primary w-full justify-center py-3 text-sm">
                 Entrar
@@ -100,16 +99,16 @@
 
             <form id="register-form" class="space-y-4 hidden">
               <div>
-                <label class="form-label">Nombre del salÃ³n</label>
+                <label class="form-label">Nombre del salón</label>
                 <input type="text" id="register-salon" required class="form-input" placeholder="Ej: Aura Nails Studio">
               </div>
               <div>
-                <label class="form-label">Correo electrÃ³nico</label>
+                <label class="form-label">Correo electrónico</label>
                 <input type="email" id="register-email" required class="form-input" placeholder="tu@email.com">
               </div>
               <div>
-                <label class="form-label">ContraseÃ±a</label>
-                <input type="password" id="register-password" required minlength="6" class="form-input" placeholder="MÃ­nimo 6 caracteres">
+                <label class="form-label">Contraseña</label>
+                <input type="password" id="register-password" required minlength="6" class="form-input" placeholder="Mínimo 6 caracteres">
               </div>
               <button type="submit" class="btn btn-primary w-full justify-center py-3 text-sm">
                 Crear Cuenta
@@ -138,7 +137,7 @@
             </div>
             <div>
               <h2 class="font-display text-base font-bold tracking-wide">NailDesk</h2>
-              <p class="text-[11px] text-white/40 truncate max-w-[140px]" id="sidebar-salon-name">Mi SalÃ³n</p>
+              <p class="text-[11px] text-white/40 truncate max-w-[140px]" id="sidebar-salon-name">Mi Salón</p>
             </div>
           </div>
         </div>
@@ -152,7 +151,7 @@
           <div class="flex-1 min-w-0">
             <p class="text-xs font-medium truncate text-white/70" id="sidebar-user-email">usuario@email.com</p>
           </div>
-          <button id="btn-logout" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Cerrar sesiÃ³n">
+          <button id="btn-logout" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Cerrar sesión">
             <i data-lucide="log-out" class="w-4 h-4 text-white/40"></i>
           </button>
         </div>
@@ -178,7 +177,7 @@
             <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
               <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <p class="text-sm font-semibold text-gray-900">Notificaciones</p>
-                <button id="btn-mark-all-read" class="text-xs text-terracota-500 hover:text-terracota-700">Marcar todo leÃ­do</button>
+                <button id="btn-mark-all-read" class="text-xs text-terracota-500 hover:text-terracota-700">Marcar todo leído</button>
               </div>
               <div id="notif-list" class="max-h-80 overflow-y-auto"></div>
             </div>
@@ -196,9 +195,9 @@
       <i data-lucide="lock" class="w-10 h-10 text-terracota-500"></i>
     </div>
     <h2 class="font-display text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
-    <p id="block-screen-msg" class="text-gray-500 mb-6 max-w-md">Tu suscripciÃ³n ha sido suspendida. Contacta al administrador para reactivar tu cuenta.</p>
+    <p id="block-screen-msg" class="text-gray-500 mb-6 max-w-md">Tu suscripción ha sido suspendida. Contacta al administrador para reactivar tu cuenta.</p>
     <button onclick="document.getElementById('btn-logout')?.click()" class="btn btn-primary px-6 py-2.5">
-      <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>Cerrar SesiÃ³n
+      <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>Cerrar Sesión
     </button>
   </div>
 
@@ -213,4 +212,3 @@
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
-

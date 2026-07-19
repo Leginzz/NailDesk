@@ -1,11 +1,10 @@
-﻿// ============================================================
-// NailDesk â€” Costos Fijos View
+// ============================================================
+// NailDesk — Costos Fijos View
 // ============================================================
 
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
-import { exportWithHeaders } from '../utils/export-excel.js';
 
 export async function renderCostosFijos() {
   const container = document.getElementById('page-content');
@@ -23,10 +22,7 @@ export async function renderCostosFijos() {
         <div class="section-divider"></div>
         <p class="text-sm font-semibold" style="color:var(--charcoal)">Total: <span style="color:var(--terracota-500)">$${total.toLocaleString('es-MX')}/mes</span></p>
       </div>
-      <div class="flex gap-2">
-        <button class="btn btn-secondary" id="btn-export-costos"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
-        <button class="btn btn-primary" id="btn-add-costo"><i data-lucide="plus" class="w-4 h-4"></i> Nuevo Costo</button>
-      </div>
+      <button class="btn btn-primary" id="btn-add-costo"><i data-lucide="plus" class="w-4 h-4"></i> Nuevo Costo</button>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-in-delay-1">
@@ -58,23 +54,13 @@ export async function renderCostosFijos() {
 
   document.getElementById('btn-add-costo').addEventListener('click', () => openCostoModal());
 
-  document.getElementById('btn-export-costos')?.addEventListener('click', () => {
-    if (!costos?.length) { showToast('No hay datos para exportar', 'error'); return; }
-    exportWithHeaders(costos, 'NailDesk-CostosFijos', {
-      'Concepto': 'concepto',
-      'Costo Mensual': 'costo_mensual',
-      'Activo': 'activo'
-    }, { widths: { 'Concepto': 25, 'Costo Mensual': 15, 'Activo': 10 } });
-    showToast('Archivo Excel descargado');
-  });
-
   container.querySelectorAll('.btn-edit-costo').forEach(btn => {
     btn.addEventListener('click', () => { const c = costos.find(x => x.id === btn.dataset.id); if (c) openCostoModal(c); });
   });
 
   container.querySelectorAll('.btn-delete-costo').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Â¿Eliminar este costo?')) return;
+      if (!confirm('¿Eliminar este costo?')) return;
       await supabase.from('costos_fijos').delete().eq('id', btn.dataset.id);
       showToast('Costo eliminado'); renderCostosFijos();
     });
@@ -102,4 +88,3 @@ function openCostoModal(costo = null) {
     closeModal(); renderCostosFijos();
   });
 }
-

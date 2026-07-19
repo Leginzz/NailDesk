@@ -1,11 +1,10 @@
-﻿// ============================================================
-// NailDesk â€” Insumos View
+// ============================================================
+// NailDesk — Insumos View
 // ============================================================
 
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
-import { exportWithHeaders } from '../utils/export-excel.js';
 
 export async function renderInsumos() {
   const container = document.getElementById('page-content');
@@ -18,9 +17,7 @@ export async function renderInsumos() {
       <div class="stat-row">
         <p class="text-sm" style="color:var(--terracota-400)">${insumos?.length || 0} insumos</p>
       </div>
-      <div class="flex gap-2">
-        <button class="btn btn-secondary" id="btn-export-insumos"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
-        <button class="btn btn-primary" id="btn-add-insumo">
+      <button class="btn btn-primary" id="btn-add-insumo">
         <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Insumo
       </button>
     </div>
@@ -29,7 +26,7 @@ export async function renderInsumos() {
       <div class="overflow-x-auto">
         <table class="data-table">
           <thead>
-            <tr><th>Producto</th><th>PresentaciÃ³n</th><th>Costo</th><th>Rendimiento</th><th>Costo/uso</th><th>Stock</th><th></th></tr>
+            <tr><th>Producto</th><th>Presentación</th><th>Costo</th><th>Rendimiento</th><th>Costo/uso</th><th>Stock</th><th></th></tr>
           </thead>
           <tbody>
             ${insumos?.map(i => `
@@ -60,19 +57,6 @@ export async function renderInsumos() {
 
   document.getElementById('btn-add-insumo').addEventListener('click', () => openInsumoModal());
 
-  document.getElementById('btn-export-insumos')?.addEventListener('click', () => {
-    if (!insumos?.length) { showToast('No hay datos para exportar', 'error'); return; }
-    exportWithHeaders(insumos, 'NailDesk-Insumos', {
-      'Producto': 'producto',
-      'Presentacion': 'presentacion',
-      'Costo Compra': 'costo_compra',
-      'Rendimiento': 'rendimiento',
-      'Costo por Uso': 'costo_por_uso',
-      'Stock': 'stock_actual'
-    }, { widths: { 'Producto': 20, 'Presentacion': 15, 'Costo Compra': 12, 'Rendimiento': 12, 'Costo por Uso': 12, 'Stock': 10 } });
-    showToast('Archivo Excel descargado');
-  });
-
   container.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', () => {
       const item = insumos.find(x => x.id === btn.dataset.id);
@@ -82,7 +66,7 @@ export async function renderInsumos() {
 
   container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Â¿Eliminar este insumo?')) return;
+      if (!confirm('¿Eliminar este insumo?')) return;
       await supabase.from('insumos').delete().eq('id', btn.dataset.id);
       showToast('Insumo eliminado');
       renderInsumos();
@@ -94,8 +78,8 @@ function openInsumoModal(item = null) {
   const isEdit = !!item;
   openModal(`
     <form id="insumo-form" class="space-y-4">
-      <div><label class="form-label">Producto</label><input type="text" id="i-producto" class="form-input" value="${item?.producto || ''}" required placeholder="Ej: Polvo acrÃ­lico"></div>
-      <div><label class="form-label">PresentaciÃ³n</label><input type="text" id="i-presentacion" class="form-input" value="${item?.presentacion || ''}" placeholder="Ej: 450 g"></div>
+      <div><label class="form-label">Producto</label><input type="text" id="i-producto" class="form-input" value="${item?.producto || ''}" required placeholder="Ej: Polvo acrílico"></div>
+      <div><label class="form-label">Presentación</label><input type="text" id="i-presentacion" class="form-input" value="${item?.presentacion || ''}" placeholder="Ej: 450 g"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="form-label">Costo de compra</label><input type="number" step="0.01" id="i-costo" class="form-input" value="${item?.costo_compra || 0}" required></div>
         <div><label class="form-label">Rendimiento (usos)</label><input type="number" id="i-rendimiento" class="form-input" value="${item?.rendimiento || 1}" required></div>
@@ -122,4 +106,3 @@ function openInsumoModal(item = null) {
     closeModal(); renderInsumos();
   });
 }
-

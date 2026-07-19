@@ -1,11 +1,10 @@
-﻿// ============================================================
-// NailDesk â€” Servicios View (con gestiÃ³n de insumos)
+// ============================================================
+// NailDesk — Servicios View (con gestión de insumos)
 // ============================================================
 
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
-import { exportWithHeaders } from '../utils/export-excel.js';
 
 let insumosCatalog = [];
 let perfilData = null;
@@ -42,9 +41,7 @@ export async function renderServicios() {
         <div class="section-divider"></div>
         <p class="text-sm" style="color:var(--terracota-300)">${servicios?.filter(s => s.activo).length || 0} activos</p>
       </div>
-      <div class="flex gap-2">
-        <button class="btn btn-secondary" id="btn-export-servicios"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
-        <button class="btn btn-primary" id="btn-add-servicio">
+      <button class="btn btn-primary" id="btn-add-servicio">
         <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Servicio
       </button>
     </div>
@@ -109,20 +106,6 @@ export async function renderServicios() {
 
   document.getElementById('btn-add-servicio').addEventListener('click', () => openServicioModal());
 
-  document.getElementById('btn-export-servicios')?.addEventListener('click', () => {
-    if (!servicios?.length) { showToast('No hay datos para exportar', 'error'); return; }
-    exportWithHeaders(servicios, 'NailDesk-Servicios', {
-      'Servicio': 'nombre',
-      'Tiempo (hrs)': 'tiempo_horas',
-      'Costo Total': 'costo_total',
-      'Ganancia %': 'porcentaje_ganancia',
-      'Precio Sugerido': 'precio_sugerido',
-      'Precio Final': 'precio_redondeado',
-      'Activo': 'activo'
-    }, { widths: { 'Servicio': 25, 'Tiempo (hrs)': 10, 'Costo Total': 12, 'Ganancia %': 10, 'Precio Sugerido': 15, 'Precio Final': 15, 'Activo': 10 } });
-    showToast('Archivo Excel descargado');
-  });
-
   container.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', async () => {
       const s = servicios.find(x => x.id === btn.dataset.id);
@@ -134,7 +117,7 @@ export async function renderServicios() {
 
   container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Â¿Eliminar este servicio y sus insumos?')) return;
+      if (!confirm('¿Eliminar este servicio y sus insumos?')) return;
       await supabase.from('servicio_insumos').delete().eq('servicio_id', btn.dataset.id);
       await supabase.from('servicios').delete().eq('id', btn.dataset.id);
       showToast('Servicio eliminado');
@@ -163,7 +146,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
       <form id="servicio-form" class="space-y-4">
         <div>
           <label class="form-label">Nombre del servicio</label>
-          <input type="text" id="s-nombre" class="form-input" value="${servicio?.nombre || ''}" required placeholder="Ej: UÃ±as acrÃ­licas">
+          <input type="text" id="s-nombre" class="form-input" value="${servicio?.nombre || ''}" required placeholder="Ej: Uñas acrílicas">
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div>
@@ -197,7 +180,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
           <div class="flex gap-2">
             <select id="s-add-insumo" class="form-input flex-1 text-xs" style="padding:0.5rem 0.625rem">
               <option value="">Agregar insumo...</option>
-              ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} â€” $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
+              ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
             </select>
             <button type="button" class="btn btn-secondary text-xs" id="s-btn-add-insumo" style="padding:0.5rem 0.75rem">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
@@ -212,11 +195,11 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
             <span class="font-semibold" id="s-cost-materiales" style="color:var(--charcoal)">$0.00</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span style="color:var(--terracota-400)">Mano de obra (<span id="s-cost-mo-hrs">0</span>h Ã— $${tarifaMO})</span>
+            <span style="color:var(--terracota-400)">Mano de obra (<span id="s-cost-mo-hrs">0</span>h × $${tarifaMO})</span>
             <span class="font-semibold" id="s-cost-mano-obra" style="color:var(--charcoal)">$0.00</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span style="color:var(--terracota-400)">Gastos fijos (<span id="s-cost-fijo-hrs">0</span>h Ã— $${costoFijoPorHora.toFixed(2)})</span>
+            <span style="color:var(--terracota-400)">Gastos fijos (<span id="s-cost-fijo-hrs">0</span>h × $${costoFijoPorHora.toFixed(2)})</span>
             <span class="font-semibold" id="s-cost-fijo" style="color:var(--charcoal)">$0.00</span>
           </div>
           <div class="flex justify-between text-sm font-bold pt-2" style="border-top:1.5px solid var(--terracota-200)">
@@ -230,7 +213,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
         </div>
 
         <div>
-          <label class="form-label">DescripciÃ³n</label>
+          <label class="form-label">Descripción</label>
           <textarea id="s-desc" class="form-input" rows="2" placeholder="Opcional">${servicio?.descripcion || ''}</textarea>
         </div>
 
@@ -282,7 +265,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
     if (select) {
       select.innerHTML = `
         <option value="">Agregar insumo...</option>
-        ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} â€” $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
+        ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
       `;
     }
     if (window.lucide) lucide.createIcons();
@@ -445,4 +428,3 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
 
   openModalForm();
 }
-
