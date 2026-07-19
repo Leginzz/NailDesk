@@ -163,31 +163,31 @@ async function openEditSubModal(subId, planes) {
   const { data: sub } = await supabase.from('suscripciones').select('*').eq('id', subId).maybeSingle();
   if (!sub) return;
 
-  openModal(``
+  openModal(`
     <form id="sub-form" class="space-y-4">
       <div>
         <label class="form-label">Plan</label>
         <select id="sub-plan" class="form-input">
-          $${(planes || []).map(p => `<option value="$${p.id}" $${sub.plan_id === p.id ? 'selected' : ''}>$${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
+          ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
         </select>
       </div>
       <div>
         <label class="form-label">Estado</label>
         <select id="sub-estado" class="form-input">
-          <option value="trial" $${sub.estado === 'trial' ? 'selected' : ''}>Trial</option>
-          <option value="activo" $${sub.estado === 'activo' ? 'selected' : ''}>Activo</option>
-          <option value="suspendido" $${sub.estado === 'suspendido' ? 'selected' : ''}>Suspendido</option>
-          <option value="cancelado" $${sub.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+          <option value="trial" ${sub.estado === 'trial' ? 'selected' : ''}>Trial</option>
+          <option value="activo" ${sub.estado === 'activo' ? 'selected' : ''}>Activo</option>
+          <option value="suspendido" ${sub.estado === 'suspendido' ? 'selected' : ''}>Suspendido</option>
+          <option value="cancelado" ${sub.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
         </select>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="form-label">Fecha inicio</label>
-          <input type="date" id="sub-fecha-inicio" value="$${sub.fecha_inicio || ''}" class="form-input">
+          <input type="date" id="sub-fecha-inicio" value="${sub.fecha_inicio || ''}" class="form-input">
         </div>
         <div>
           <label class="form-label">Fecha fin</label>
-          <input type="date" id="sub-fecha-fin" value="$${sub.fecha_fin || ''}" class="form-input">
+          <input type="date" id="sub-fecha-fin" value="${sub.fecha_fin || ''}" class="form-input">
         </div>
       </div>
       <div class="flex gap-3 pt-2">
@@ -195,7 +195,7 @@ async function openEditSubModal(subId, planes) {
         <button type="submit" class="btn btn-primary flex-1">Guardar</button>
       </div>
     </form>
-  ``, { title: 'Editar Suscripción' });
+  `, { title: 'Editar Suscripción' });
 
   document.getElementById('sub-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
