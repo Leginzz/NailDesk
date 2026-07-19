@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NailDesk — Gestión de Salón</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Playfair Display', 'serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            terracota: {
+              50: '#F8F8FA', 100: '#E5E7EB', 200: '#D1D5DB', 300: '#C994A1',
+              400: '#B8849A', 500: '#A0607A', 600: '#8A4E66', 700: '#6B3A50', 800: '#5A2D42',
+            },
+            olive: { 50: '#F5F7F4', 100: '#E5EDE4', 500: '#8BA888', 600: '#6B8A68' },
+            sand: { 50: '#FAFAFA', 100: '#F5F3F0' },
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="font-body min-h-screen">
+
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="hidden">
+    <div class="auth-split">
+      <!-- Visual Side -->
+      <div class="auth-visual">
+        <div class="auth-visual-content">
+          <div class="auth-deco">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/>
+              <path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/>
+              <circle cx="12" cy="12" r="1.5"/>
+            </svg>
+          </div>
+          <h2>Tu negocio,<br>tu control</h2>
+          <p>Gestiona costos, inventario, precios y ventas de tu salón de uñas en un solo lugar.</p>
+          <div class="mt-8 flex justify-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-white/30"></div>
+            <div class="w-2 h-2 rounded-full bg-white/60"></div>
+            <div class="w-2 h-2 rounded-full bg-white/30"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Side -->
+      <div class="auth-form-side">
+        <div class="w-full max-w-sm">
+          <div class="mb-8 lg:hidden text-center">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl overflow-hidden mb-3 shadow-lg shadow-terracota-300/40">
+              <img src="Logo ND.png" alt="NailDesk" class="w-full h-full object-cover">
+            </div>
+            <h1 class="font-display text-2xl font-bold" style="color:var(--charcoal)">NailDesk</h1>
+          </div>
+          <div class="mb-8 hidden lg:block">
+            <h1 class="font-display text-2xl font-bold mb-1" style="color:var(--charcoal)">Bienvenida de nuevo</h1>
+            <p class="text-sm" style="color:var(--terracota-400)">Inicia sesión para continuar</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 shadow-xl border border-terracota-100/50">
+            <div class="flex mb-6 bg-terracota-50 rounded-xl p-1">
+              <button id="tab-login" class="flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-terracota-600 shadow-sm transition-all">
+                Iniciar Sesión
+              </button>
+              <button id="tab-register" class="flex-1 py-2.5 text-sm font-semibold rounded-lg text-gray-400 transition-all">
+                Crear Cuenta
+              </button>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+              <div>
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" id="login-email" required class="form-input" placeholder="tu@email.com">
+              </div>
+              <div>
+                <label class="form-label">Contraseña</label>
+                <input type="password" id="login-password" required class="form-input" placeholder="••••••••">
+              </div>
+              <button type="submit" class="btn btn-primary w-full justify-center py-3 text-sm">
+                Entrar
+              </button>
+            </form>
+
+            <form id="register-form" class="space-y-4 hidden">
+              <div>
+                <label class="form-label">Nombre del salón</label>
+                <input type="text" id="register-salon" required class="form-input" placeholder="Ej: Aura Nails Studio">
+              </div>
+              <div>
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" id="register-email" required class="form-input" placeholder="tu@email.com">
+              </div>
+              <div>
+                <label class="form-label">Contraseña</label>
+                <input type="password" id="register-password" required minlength="6" class="form-input" placeholder="Mínimo 6 caracteres">
+              </div>
+              <button type="submit" class="btn btn-primary w-full justify-center py-3 text-sm">
+                Crear Cuenta
+              </button>
+            </form>
+
+            <div id="auth-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Shell -->
+  <div id="app-shell" class="hidden min-h-screen flex">
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-64 text-white flex-shrink-0 flex flex-col shadow-2xl z-30">
+      <div class="relative z-10">
+        <div class="p-5 border-b border-white/10">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-terracota-500/20">
+              <img src="Logo ND.png" alt="NailDesk" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <h2 class="font-display text-base font-bold tracking-wide">NailDesk</h2>
+              <p class="text-[11px] text-white/40 truncate max-w-[140px]" id="sidebar-salon-name">Mi Salón</p>
+            </div>
+          </div>
+        </div>
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-180px)]" id="sidebar-nav"></nav>
+      </div>
+      <div class="relative z-10 p-3 border-t border-white/10 mt-auto">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-terracota-500/20 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user" class="w-4 h-4 text-terracota-300"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-medium truncate text-white/70" id="sidebar-user-email">usuario@email.com</p>
+          </div>
+          <button id="btn-logout" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Cerrar sesión">
+            <i data-lucide="log-out" class="w-4 h-4 text-white/40"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header id="app-header" class="h-14 bg-white/80 backdrop-blur-sm border-b border-terracota-100 flex items-center justify-between px-6 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <button id="btn-toggle-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-terracota-50 transition-colors">
+            <i data-lucide="menu" class="w-5 h-5 text-terracota-600"></i>
+          </button>
+          <h1 id="page-title" class="text-lg font-semibold" style="color:var(--charcoal)">Dashboard</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-terracota-400 hidden sm:block" id="header-date"></span>
+        </div>
+      </header>
+      <main id="page-content" class="flex-1 p-6 overflow-y-auto"></main>
+    </div>
+  </div>
+
+  <!-- Block Screen (subscription suspended/cancelled) -->
+  <div id="block-screen" class="hidden fixed inset-0 bg-white z-[60] flex flex-col items-center justify-center text-center px-6">
+    <div class="w-20 h-20 rounded-full bg-terracota-100 flex items-center justify-center mb-6">
+      <i data-lucide="lock" class="w-10 h-10 text-terracota-500"></i>
+    </div>
+    <h2 class="font-display text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+    <p id="block-screen-msg" class="text-gray-500 mb-6 max-w-md">Tu suscripción ha sido suspendida. Contacta al administrador para reactivar tu cuenta.</p>
+    <button onclick="document.getElementById('btn-logout')?.click()" class="btn btn-primary px-6 py-2.5">
+      <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>Cerrar Sesión
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal-overlay" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="modal-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-terracota-100/50"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

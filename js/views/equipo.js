@@ -1,0 +1,98 @@
+// ============================================================
+// NailDesk — Equipo View
+// ============================================================
+
+import supabase from '../supabase.js';
+import { openModal, closeModal } from '../components/modal.js';
+import { showToast } from '../components/toast.js';
+
+export async function renderEquipo() {
+  const container = document.getElementById('page-content');
+  container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
+
+  const { data: equipo } = await supabase.from('equipo_herramientas').select('*').order('created_at', { ascending: false });
+  const totalEquipo = equipo?.reduce((s, e) => s + Number(e.costo_compra), 0) || 0;
+
+  container.innerHTML = `
+    <div class="section-header animate-in">
+      <div class="stat-row">
+        <p class="text-sm" style="color:var(--terracota-400)">${equipo?.length || 0} herramientas</p>
+        <div class="section-divider"></div>
+        <p class="text-sm" style="color:var(--terracota-300)">Inversión: <span class="font-semibold" style="color:var(--charcoal)">$${totalEquipo.toLocaleString('es-MX')}</span></p>
+      </div>
+      <button class="btn btn-primary" id="btn-add-equipo"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Herramienta</button>
+    </div>
+
+    <div class="card overflow-hidden animate-in-delay-1">
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead><tr><th>Herramienta</th><th>Costo compra</th><th>Vida útil</th><th>Costo/servicio</th><th></th></tr></thead>
+          <tbody>
+            ${equipo?.map(e => `
+              <tr>
+                <td class="font-semibold" style="color:var(--charcoal)">${e.herramienta}</td>
+                <td>$${Number(e.costo_compra).toLocaleString('es-MX')}</td>
+                <td><span class="badge badge-info">${e.vida_util_servicios.toLocaleString()} usos</span></td>
+                <td class="font-bold" style="color:var(--terracota-600)">$${Number(e.costo_por_servicio).toFixed(2)}</td>
+                <td>
+                  <div class="flex gap-1">
+                    <button class="btn btn-ghost btn-edit-eq" data-id="${e.id}" style="padding:0.375rem"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn btn-ghost btn-delete-eq" data-id="${e.id}" style="padding:0.375rem"><i data-lucide="trash-2" class="w-4 h-4" style="color:#dc6b4a"></i></button>
+                  </div>
+                </td>
+              </tr>
+            `).join('') || `
+              <tr><td colspan="5" class="text-center py-12"><div class="empty-state"><i data-lucide="wrench" class="w-12 h-12 mx-auto mb-3"></i><p class="font-medium" style="color:var(--terracota-400)">No hay herramientas</p></div></td></tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  if (window.lucide) lucide.createIcons();
+
+  document.getElementById('btn-add-equipo').addEventListener('click', () => openEquipoModal());
+
+  container.querySelectorAll('.btn-edit-eq').forEach(btn => {
+    btn.addEventListener('click', () => { const e = equipo.find(x => x.id === btn.dataset.id); if (e) openEquipoModal(e); });
+  });
+
+  container.querySelectorAll('.btn-delete-eq').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar esta herramienta?')) return;
+      await supabase.from('equipo_herramientas').delete().eq('id', btn.dataset.id);
+      showToast('Herramienta eliminada'); renderEquipo();
+    });
+  });
+}
+
+function openEquipoModal(item = null) {
+  const isEdit = !!item;
+  openModal(`
+    <form id="equipo-form" class="space-y-4">
+      <div><label class="form-label">Nombre</label><input type="text" id="e-herramienta" class="form-input" value="${item?.herramienta || ''}" required placeholder="Ej: Micromotor"></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">Costo compra</label><input type="number" step="0.01" id="e-costo" class="form-input" value="${item?.costo_compra || 0}" required></div>
+        <div><label class="form-label">Vida útil (servicios)</label><input type="number" id="e-vida" class="form-input" value="${item?.vida_util_servicios || 3000}" required></div>
+      </div>
+      <p class="text-xs" style="color:var(--terracota-300)">Costo por servicio se calcula: costo ÷ vida útil</p>
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="btn btn-secondary flex-1" onclick="document.getElementById('modal-close-btn').click()">Cancelar</button>
+        <button type="submit" class="btn btn-primary flex-1">${isEdit ? 'Guardar' : 'Crear'}</button>
+      </div>
+    </form>
+  `, { title: isEdit ? 'Editar Herramienta' : 'Nueva Herramienta' });
+
+  document.getElementById('equipo-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      herramienta: document.getElementById('e-herramienta').value,
+      costo_compra: Number(document.getElementById('e-costo').value),
+      vida_util_servicios: Number(document.getElementById('e-vida').value),
+    };
+    if (isEdit) { await supabase.from('equipo_herramientas').update(data).eq('id', item.id); showToast('Herramienta actualizada'); }
+    else { await supabase.from('equipo_herramientas').insert(data); showToast('Herramienta creada'); }
+    closeModal(); renderEquipo();
+  });
+}
