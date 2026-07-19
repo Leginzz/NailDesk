@@ -1,10 +1,11 @@
-// ============================================================
-// NailDesk — Ventas View
+﻿// ============================================================
+// NailDesk â€” Ventas View
 // ============================================================
 
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
+import { exportWithHeaders } from '../utils/export-excel.js';
 
 export async function renderVentas() {
   const container = document.getElementById('page-content');
@@ -25,14 +26,17 @@ export async function renderVentas() {
         <div class="section-divider"></div>
         <p class="text-sm" style="color:var(--terracota-300)">Ganancia: <span class="font-semibold" style="color:var(--terracota-500)">$${totalGanancia.toLocaleString('es-MX')}</span></p>
       </div>
-      <button class="btn btn-primary" id="btn-add-venta"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Venta</button>
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" id="btn-export-ventas"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
+        <button class="btn btn-primary" id="btn-add-venta"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Venta</button>
+      </div>
     </div>
 
     <div class="card overflow-hidden animate-in-delay-1">
       <div class="overflow-x-auto">
         <table class="data-table">
           <thead>
-            <tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Cobrado</th><th>Ganancia</th><th>Método</th><th></th></tr>
+            <tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Cobrado</th><th>Ganancia</th><th>MÃ©todo</th><th></th></tr>
           </thead>
           <tbody>
             ${ventas?.map(v => `
@@ -58,9 +62,24 @@ export async function renderVentas() {
 
   document.getElementById('btn-add-venta').addEventListener('click', () => openVentaModal(servicios));
 
+  document.getElementById('btn-export-ventas')?.addEventListener('click', () => {
+    if (!ventas?.length) { showToast('No hay datos para exportar', 'error'); return; }
+    exportWithHeaders(ventas, 'NailDesk-Ventas', {
+      'Fecha': 'fecha',
+      'Cliente': 'cliente_nombre',
+      'Servicio': 'servicio_nombre',
+      'Precio Cobrado': 'precio_cobrado',
+      'Costo Estimado': 'costo_estimado',
+      'Ganancia': 'ganancia',
+      'Metodo Pago': 'metodo_pago',
+      'Notas': 'notas'
+    }, { widths: { 'Fecha': 12, 'Cliente': 20, 'Servicio': 20, 'Precio Cobrado': 15, 'Costo Estimado': 15, 'Ganancia': 12, 'Metodo Pago': 15, 'Notas': 25 } });
+    showToast('Archivo Excel descargado');
+  });
+
   container.querySelectorAll('.btn-delete-venta').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('¿Eliminar esta venta?')) return;
+      if (!confirm('Â¿Eliminar esta venta?')) return;
       await supabase.from('ventas').delete().eq('id', btn.dataset.id);
       showToast('Venta eliminada'); renderVentas();
     });
@@ -80,7 +99,7 @@ function openVentaModal(servicios) {
         <label class="form-label">Servicio</label>
         <select id="v-servicio" class="form-input">
           <option value="">Seleccionar...</option>
-          ${servicios?.map(s => `<option value="${s.id}" data-precio="${s.precio_redondeado}" data-costo="${s.costo_total}">${s.nombre} — $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
+          ${servicios?.map(s => `<option value="${s.id}" data-precio="${s.precio_redondeado}" data-costo="${s.costo_total}">${s.nombre} â€” $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
         </select>
       </div>
       <div class="grid grid-cols-2 gap-4">
@@ -92,7 +111,7 @@ function openVentaModal(servicios) {
         <input type="number" step="0.01" id="v-costo" class="form-input" value="0">
       </div>
       <div>
-        <label class="form-label">Método de pago</label>
+        <label class="form-label">MÃ©todo de pago</label>
         <select id="v-metodo" class="form-input">
           <option value="Efectivo">Efectivo</option>
           <option value="Tarjeta">Tarjeta</option>
@@ -123,7 +142,7 @@ function openVentaModal(servicios) {
       fecha: document.getElementById('v-fecha').value,
       cliente_nombre: document.getElementById('v-cliente').value || null,
       servicio_id: sel.value || null,
-      servicio_nombre: opt?.textContent?.split(' — ')[0] || null,
+      servicio_nombre: opt?.textContent?.split(' â€” ')[0] || null,
       precio_sugerido: Number(document.getElementById('v-precio-sug').value),
       precio_cobrado: Number(document.getElementById('v-precio-cobrado').value),
       costo_estimado: Number(document.getElementById('v-costo').value),
@@ -134,3 +153,4 @@ function openVentaModal(servicios) {
     showToast('Venta registrada'); closeModal(); renderVentas();
   });
 }
+

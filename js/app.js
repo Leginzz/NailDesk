@@ -1,5 +1,5 @@
-// ============================================================
-// NailDesk — Main App (SPA Router + Admin + Block Screen)
+﻿// ============================================================
+// NailDesk â€” Main App (SPA Router + Admin + Block Screen)
 // ============================================================
 
 import { initAuth } from './auth.js';
@@ -27,15 +27,16 @@ const USER_ROUTES = {
   'equipo': { title: 'Equipo y Herramientas', render: renderEquipo },
   'extras': { title: 'Extras y Adicionales', render: renderExtras },
   'ventas': { title: 'Registro de Ventas', render: renderVentas },
-  'configuracion': { title: 'Configuración', render: renderConfiguracion },
+  'configuracion': { title: 'ConfiguraciÃ³n', render: renderConfiguracion },
 };
 
 const ADMIN_ROUTES = {
-  'admin-salones': { title: 'Gestión de Salones', render: () => import('./views/admin/admin-salones.js').then(m => m.renderAdminSalones()) },
-  'admin-planes': { title: 'Planes de Suscripción', render: () => import('./views/admin/admin-planes.js').then(m => m.renderAdminPlanes()) },
+  'admin-salones': { title: 'GestiÃ³n de Salones', render: () => import('./views/admin/admin-salones.js').then(m => m.renderAdminSalones()) },
+  'admin-planes': { title: 'Planes de SuscripciÃ³n', render: () => import('./views/admin/admin-planes.js').then(m => m.renderAdminPlanes()) },
   'admin-suscripciones': { title: 'Suscripciones', render: () => import('./views/admin/admin-suscripciones.js').then(m => m.renderAdminSuscripciones()) },
   'admin-ingresos': { title: 'Ingresos SaaS', render: () => import('./views/admin/admin-ingresos.js').then(m => m.renderAdminIngresos()) },
   'admin-banner': { title: 'Config Banner', render: () => import('./views/admin/admin-banner.js').then(m => m.renderAdminBanner()) },
+  'admin-users': { title: 'Gestionar Admins', render: () => import('./views/admin/admin-users.js').then(m => m.renderAdminUsers()) },
 };
 
 const ALL_ROUTES = { ...USER_ROUTES, ...ADMIN_ROUTES };
@@ -49,8 +50,8 @@ function showBlockScreen() {
   if (msg) {
     const isCancelled = sub?.estado === 'cancelado';
     msg.textContent = isCancelled
-      ? 'Tu suscripción ha sido cancelada. Contacta al administrador para reactivar tu cuenta.'
-      : 'Tu suscripción ha sido suspendida. Contacta al administrador para reactivar tu cuenta.';
+      ? 'Tu suscripciÃ³n ha sido cancelada. Contacta al administrador para reactivar tu cuenta.'
+      : 'Tu suscripciÃ³n ha sido suspendida. Contacta al administrador para reactivar tu cuenta.';
   }
   blockScreen?.classList.remove('hidden');
   if (window.lucide) lucide.createIcons();
@@ -116,7 +117,7 @@ window.addEventListener('auth:ready', async (e) => {
   }
 
   const { data: perfil } = await supabase.from('perfiles_negocio').select('nombre_salon').single();
-  updateSalonName(perfil?.nombre_salon || 'Mi Salón');
+  updateSalonName(perfil?.nombre_salon || 'Mi SalÃ³n');
 
   navigate(getHashView());
 });
@@ -128,3 +129,4 @@ window.addEventListener('perfil:updated', (e) => {
 if (window.lucide) lucide.createIcons();
 
 initAuth();
+

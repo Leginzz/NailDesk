@@ -1,5 +1,5 @@
-// ============================================================
-// NailDesk — Sidebar Component (dynamic nav by modules)
+﻿// ============================================================
+// NailDesk â€” Sidebar Component (dynamic nav by modules)
 // ============================================================
 
 import AppState from '../services/app-state.js';
@@ -13,7 +13,7 @@ const ALL_NAV_ITEMS = [
   { id: 'equipo', label: 'Equipo', icon: 'wrench', clave: 'equipo' },
   { id: 'extras', label: 'Extras', icon: 'plus-circle', clave: 'extras' },
   { id: 'ventas', label: 'Ventas', icon: 'shopping-cart', clave: 'ventas' },
-  { id: 'configuracion', label: 'Configuración', icon: 'settings', clave: 'configuracion' },
+  { id: 'configuracion', label: 'ConfiguraciÃ³n', icon: 'settings', clave: 'configuracion' },
 ];
 
 const ADMIN_ITEMS = [
@@ -22,6 +22,7 @@ const ADMIN_ITEMS = [
   { id: 'admin-planes', label: 'Planes', icon: 'layers' },
   { id: 'admin-ingresos', label: 'Ingresos SaaS', icon: 'trending-up' },
   { id: 'admin-banner', label: 'Config Banner', icon: 'megaphone' },
+  { id: 'admin-users', label: 'Admins', icon: 'shield' },
 ];
 
 function getNavItems() {
@@ -61,7 +62,7 @@ export function renderSidebar(currentView) {
 
 export function updateSalonName(name) {
   const el = document.getElementById('sidebar-salon-name');
-  if (el) el.textContent = name || 'Mi Salón';
+  if (el) el.textContent = name || 'Mi SalÃ³n';
 }
 
 export function updateUserEmail(email) {
@@ -90,3 +91,4 @@ document.getElementById('sidebar-nav')?.addEventListener('click', (e) => {
 });
 
 export { ALL_NAV_ITEMS, ADMIN_ITEMS };
+
