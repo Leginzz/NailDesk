@@ -3,6 +3,8 @@
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { openModal, closeModal } from '../../components/modal.js';
+import { showToast } from '../../components/toast.js';
 
 export async function renderAdminSalones() {
   const content = document.getElementById('page-content');
@@ -186,42 +188,38 @@ async function promptChangePlan(userId) {
     .eq('user_id', userId)
     .maybeSingle();
 
-  const content = document.getElementById('modal-content');
-  content.innerHTML = `
-    <div class="p-6">
-      <h3 class="font-display text-lg font-bold text-gray-900 mb-4">Cambiar Plan</h3>
-      <div class="space-y-3">
-        ${planes.map(p => `
-          <button data-plan-id="${p.id}" class="change-plan-btn w-full text-left p-4 rounded-xl border-2 transition-all ${current?.plan_id === p.id ? 'border-terracota-500 bg-terracota-50' : 'border-gray-200 hover:border-gray-300'}">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="font-semibold text-gray-900">${p.nombre}</p>
-                <p class="text-sm text-gray-500">${p.descripcion || ''}</p>
-              </div>
-              <p class="font-bold text-terracota-600">${p.precio_mensual > 0 ? '$' + p.precio_mensual + '/mes' : 'Gratis'}</p>
+  openModal(`
+    <div class="space-y-3">
+      ${planes.map(p => `
+        <button data-plan-id="${p.id}" class="change-plan-btn w-full text-left p-4 rounded-xl border-2 transition-all ${current?.plan_id === p.id ? 'border-terracota-500 bg-terracota-50' : 'border-gray-200 hover:border-gray-300'}">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-gray-900">${p.nombre}</p>
+              <p class="text-sm text-gray-500">${p.descripcion || ''}</p>
             </div>
-          </button>
-        `).join('')}
-      </div>
-      <button id="close-modal" class="mt-4 w-full btn btn-ghost text-sm">Cancelar</button>
+            <p class="font-bold text-terracota-600">${p.precio_mensual > 0 ? '$' + p.precio_mensual + '/mes' : 'Gratis'}</p>
+          </div>
+        </button>
+      `).join('')}
     </div>
-  `;
+  `, { title: 'Cambiar Plan' });
 
-  document.getElementById('modal-overlay').classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
-
-  document.getElementById('close-modal')?.addEventListener('click', () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-  });
-
-  content.querySelectorAll('.change-plan-btn').forEach(btn => {
+  document.querySelectorAll('.change-plan-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const planId = btn.dataset.planId;
-      await supabase
+      const { error } = await supabase
         .from('suscripciones')
-        .update({ plan_id: planId, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-      document.getElementById('modal-overlay').classList.add('hidden');
+        .upsert({
+          user_id: userId,
+          plan_id: planId,
+          estado: 'activo',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      if (error) {
+        showToast('Error: ' + error.message);
+        return;
+      }
+      closeModal();
       renderAdminSalones();
       showToast('Plan actualizado');
     });
@@ -235,14 +233,9 @@ async function showSalonDetails(userId) {
   const { count: servicios } = await supabase.from('servicios').select('*', { count: 'exact', head: true }).eq('user_id', userId);
   const { count: insumos } = await supabase.from('insumos').select('*', { count: 'exact', head: true }).eq('user_id', userId);
 
-  const content = document.getElementById('modal-content');
-  content.innerHTML = `
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="font-display text-lg font-bold text-gray-900">${perfil?.nombre_salon || 'Sin nombre'}</h3>
-        <button id="close-modal" class="p-2 rounded-lg hover:bg-gray-100"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mb-6">
+  openModal(`
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
         <div class="bg-gray-50 rounded-xl p-4 text-center">
           <p class="text-2xl font-bold text-terracota-600">${ventas || 0}</p>
           <p class="text-xs text-gray-500 mt-1">Ventas registradas</p>
@@ -262,25 +255,10 @@ async function showSalonDetails(userId) {
       </div>
       <div class="text-sm text-gray-500 space-y-1">
         <p><span class="font-medium text-gray-700">User ID:</span> ${userId}</p>
-        <p><span class="font-medium text-gray-700">Email:</span> ${perfil?.user_id || 'N/A'}</p>
         <p><span class="font-medium text-gray-700">Registro:</span> ${perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX') : 'N/A'}</p>
       </div>
     </div>
-  `;
-
-  document.getElementById('modal-overlay').classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
-
-  document.getElementById('close-modal')?.addEventListener('click', () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-  });
+  `, { title: perfil?.nombre_salon || 'Detalle del Salon' });
 }
 
-function showToast(msg) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm shadow-lg';
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
+
