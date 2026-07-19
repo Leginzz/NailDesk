@@ -95,13 +95,13 @@ export async function renderAdminIngresos() {
         <!-- Revenue by plan -->
         <div class="bg-white rounded-xl border border-gray-100 p-5">
           <h4 class="font-semibold text-gray-900 mb-4">Ingresos por Plan</h4>
-          <canvas id="chart-revenue-plan" height="200"></canvas>
+          <div style="height:250px"><canvas id="chart-revenue-plan"></canvas></div>
         </div>
 
         <!-- Subscribers by status -->
         <div class="bg-white rounded-xl border border-gray-100 p-5">
           <h4 class="font-semibold text-gray-900 mb-4">Suscriptores por Estado</h4>
-          <canvas id="chart-status-dist" height="200"></canvas>
+          <div style="height:250px"><canvas id="chart-status-dist"></canvas></div>
         </div>
       </div>
 

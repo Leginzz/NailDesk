@@ -167,7 +167,21 @@
           </button>
           <h1 id="page-title" class="text-lg font-semibold" style="color:var(--charcoal)">Dashboard</h1>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+          <!-- Notifications Bell (admin) -->
+          <div class="relative" id="notifications-wrapper">
+            <button id="btn-notifications" class="p-2 rounded-lg hover:bg-terracota-50 transition-colors relative hidden" title="Notificaciones">
+              <i data-lucide="bell" class="w-5 h-5 text-terracota-600"></i>
+              <span id="notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+              <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <p class="text-sm font-semibold text-gray-900">Notificaciones</p>
+                <button id="btn-mark-all-read" class="text-xs text-terracota-500 hover:text-terracota-700">Marcar todo leído</button>
+              </div>
+              <div id="notif-list" class="max-h-80 overflow-y-auto"></div>
+            </div>
+          </div>
           <span class="text-xs text-terracota-400 hidden sm:block" id="header-date"></span>
         </div>
       </header>

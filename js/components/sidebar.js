@@ -21,6 +21,7 @@ const ADMIN_ITEMS = [
   { id: 'admin-suscripciones', label: 'Suscripciones', icon: 'credit-card' },
   { id: 'admin-planes', label: 'Planes', icon: 'layers' },
   { id: 'admin-ingresos', label: 'Ingresos SaaS', icon: 'trending-up' },
+  { id: 'admin-banner', label: 'Config Banner', icon: 'megaphone' },
 ];
 
 function getNavItems() {

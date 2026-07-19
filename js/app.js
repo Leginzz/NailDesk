@@ -4,6 +4,7 @@
 
 import { initAuth } from './auth.js';
 import { renderSidebar, updateSalonName, updateUserEmail } from './components/sidebar.js';
+import { initNotifications, loadNotifications } from './components/notifications.js';
 import AppState from './services/app-state.js';
 import supabase from './supabase.js';
 
@@ -34,6 +35,7 @@ const ADMIN_ROUTES = {
   'admin-planes': { title: 'Planes de Suscripción', render: () => import('./views/admin/admin-planes.js').then(m => m.renderAdminPlanes()) },
   'admin-suscripciones': { title: 'Suscripciones', render: () => import('./views/admin/admin-suscripciones.js').then(m => m.renderAdminSuscripciones()) },
   'admin-ingresos': { title: 'Ingresos SaaS', render: () => import('./views/admin/admin-ingresos.js').then(m => m.renderAdminIngresos()) },
+  'admin-banner': { title: 'Config Banner', render: () => import('./views/admin/admin-banner.js').then(m => m.renderAdminBanner()) },
 };
 
 const ALL_ROUTES = { ...USER_ROUTES, ...ADMIN_ROUTES };
@@ -101,6 +103,17 @@ window.addEventListener('auth:ready', async (e) => {
 
   // Load app state (role, subscription, modules)
   await AppState.load(user.id);
+
+  // Show/hide notifications bell for admin
+  const notifWrapper = document.getElementById('notifications-wrapper');
+  if (notifWrapper) {
+    if (AppState.isAdmin) {
+      notifWrapper.classList.remove('hidden');
+      initNotifications();
+    } else {
+      notifWrapper.classList.add('hidden');
+    }
+  }
 
   const { data: perfil } = await supabase.from('perfiles_negocio').select('nombre_salon').single();
   updateSalonName(perfil?.nombre_salon || 'Mi Salón');

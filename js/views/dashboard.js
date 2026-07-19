@@ -3,6 +3,7 @@
 // ============================================================
 
 import supabase from '../supabase.js';
+import { renderUpgradeBanner } from '../components/upgrade-banner.js';
 
 let chartInstance = null;
 
@@ -29,6 +30,9 @@ export async function renderDashboard() {
   const hora = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
   container.innerHTML = `
+    <!-- Upgrade Banner (Free plan users only) -->
+    <div id="upgrade-banner-slot"></div>
+
     <!-- Hero -->
     <div class="hero-card mb-6 animate-in">
       <div class="relative z-10">
@@ -136,6 +140,7 @@ export async function renderDashboard() {
   `;
 
   if (window.lucide) lucide.createIcons();
+  renderUpgradeBanner(document.getElementById('upgrade-banner-slot'));
   renderVentasChart(ventas);
 }
 
