@@ -1,8 +1,10 @@
-// ============================================================
-// NailDesk — Admin: Suscripciones
+﻿// ============================================================
+// NailDesk â€” Admin: Suscripciones
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { openModal, closeModal } from '../../components/modal.js';
+import { showToast } from '../../components/toast.js';
 
 export async function renderAdminSuscripciones() {
   const content = document.getElementById('page-content');
@@ -73,7 +75,7 @@ export async function renderAdminSuscripciones() {
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-gray-100 bg-gray-50">
-                <th class="text-left px-4 py-3 font-medium text-gray-500">Salón</th>
+                <th class="text-left px-4 py-3 font-medium text-gray-500">SalÃ³n</th>
                 <th class="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
                 <th class="text-left px-4 py-3 font-medium text-gray-500">Estado</th>
                 <th class="text-left px-4 py-3 font-medium text-gray-500">Inicio</th>
@@ -112,7 +114,12 @@ export async function renderAdminSuscripciones() {
       await openEditSubModal(subId, planes);
     } else if (action === 'change-status') {
       const newStatus = btn.dataset.newStatus;
-      await supabase.from('suscripciones').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', subId);
+      const { error } = await supabase.from('suscripciones').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', subId);
+      if (error) {
+        showToast('Error: ' + error.message, 'error');
+        return;
+      }
+      showToast('Estado actualizado');
       renderAdminSuscripciones();
     }
   });
@@ -139,8 +146,8 @@ function renderSubRow(sub) {
       <td class="px-4 py-3">
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${estadoColors[sub.estado] || ''}">${sub.estado}</span>
       </td>
-      <td class="px-4 py-3 text-sm text-gray-500">${sub.fecha_inicio ? new Date(sub.fecha_inicio).toLocaleDateString('es-MX') : '—'}</td>
-      <td class="px-4 py-3 text-sm text-gray-500">${sub.fecha_fin ? new Date(sub.fecha_fin).toLocaleDateString('es-MX') : '—'}</td>
+      <td class="px-4 py-3 text-sm text-gray-500">${sub.fecha_inicio ? new Date(sub.fecha_inicio).toLocaleDateString('es-MX') : 'â€”'}</td>
+      <td class="px-4 py-3 text-sm text-gray-500">${sub.fecha_fin ? new Date(sub.fecha_fin).toLocaleDateString('es-MX') : 'â€”'}</td>
       <td class="px-4 py-3 text-right">
         <div class="flex items-center justify-end gap-1">
           <button data-action="edit-sub" data-sub-id="${sub.id}" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600" title="Editar">
@@ -162,12 +169,12 @@ async function openEditSubModal(subId, planes) {
   const content = document.getElementById('modal-content');
   content.innerHTML = `
     <div class="p-6">
-      <h3 class="font-display text-lg font-bold text-gray-900 mb-4">Editar Suscripción</h3>
+      <h3 class="font-display text-lg font-bold text-gray-900 mb-4">Editar SuscripciÃ³n</h3>
       <form id="sub-form" class="space-y-4">
         <div>
           <label class="form-label">Plan</label>
           <select id="sub-plan" class="form-input">
-            ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
+            ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${p.nombre} â€” $${p.precio_mensual}/mes</option>`).join('')}
           </select>
         </div>
         <div>
@@ -218,3 +225,5 @@ async function openEditSubModal(subId, planes) {
     renderAdminSuscripciones();
   });
 }
+
+
