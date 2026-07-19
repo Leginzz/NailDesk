@@ -1,13 +1,7 @@
-﻿// ============================================================
-// NailDesk — Export to Excel Utility (uses SheetJS/xlsx)
+// ============================================================
+// NailDesk - Export to Excel Utility (uses SheetJS/xlsx)
 // ============================================================
 
-/**
- * Export data array to .xlsx file
- * @param {Array<Object>} data - Array of objects to export
- * @param {string} filename - Filename without extension
- * @param {Array<{header: string, key: string, width?: number}>} columns - Column definitions
- */
 export function exportToExcel(data, filename, columns = null) {
   if (!window.XLSX) {
     console.error('SheetJS (xlsx) not loaded');
@@ -26,13 +20,6 @@ export function exportToExcel(data, filename, columns = null) {
   XLSX.writeFile(wb, filename + '.xlsx');
 }
 
-/**
- * Export data with custom header mapping
- * @param {Array<Object>} data - Source data
- * @param {string} filename - Filename without extension
- * @param {Object} headerMap - { "Header Label": "source_key" }
- * @param {Object} options - { widths: { "Header Label": number } }
- */
 export function exportWithHeaders(data, filename, headerMap, options = {}) {
   const headers = Object.keys(headerMap);
   const keys = Object.values(headerMap);

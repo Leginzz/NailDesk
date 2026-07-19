@@ -36,6 +36,7 @@ const ADMIN_ROUTES = {
   'admin-suscripciones': { title: 'Suscripciones', render: () => import('./views/admin/admin-suscripciones.js').then(m => m.renderAdminSuscripciones()) },
   'admin-ingresos': { title: 'Ingresos SaaS', render: () => import('./views/admin/admin-ingresos.js').then(m => m.renderAdminIngresos()) },
   'admin-banner': { title: 'Config Banner', render: () => import('./views/admin/admin-banner.js').then(m => m.renderAdminBanner()) },
+  'admin-users': { title: 'Gestionar Admins', render: () => import('./views/admin/admin-users.js').then(m => m.renderAdminUsers()) },
 };
 
 const ALL_ROUTES = { ...USER_ROUTES, ...ADMIN_ROUTES };

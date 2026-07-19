@@ -5,6 +5,7 @@
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
+import { exportWithHeaders } from '../utils/export-excel.js';
 
 export async function renderVentas() {
   const container = document.getElementById('page-content');
@@ -25,7 +26,10 @@ export async function renderVentas() {
         <div class="section-divider"></div>
         <p class="text-sm" style="color:var(--terracota-300)">Ganancia: <span class="font-semibold" style="color:var(--terracota-500)">$${totalGanancia.toLocaleString('es-MX')}</span></p>
       </div>
-      <button class="btn btn-primary" id="btn-add-venta"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Venta</button>
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" id="btn-export-ventas"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
+        <button class="btn btn-primary" id="btn-add-venta"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Venta</button>
+      </div>
     </div>
 
     <div class="card overflow-hidden animate-in-delay-1">
@@ -57,6 +61,21 @@ export async function renderVentas() {
   if (window.lucide) lucide.createIcons();
 
   document.getElementById('btn-add-venta').addEventListener('click', () => openVentaModal(servicios));
+
+  document.getElementById('btn-export-ventas')?.addEventListener('click', () => {
+    if (!ventas?.length) { showToast('No hay datos para exportar', 'error'); return; }
+    exportWithHeaders(ventas, 'NailDesk-Ventas', {
+      'Fecha': 'fecha',
+      'Cliente': 'cliente_nombre',
+      'Servicio': 'servicio_nombre',
+      'Precio Cobrado': 'precio_cobrado',
+      'Costo Estimado': 'costo_estimado',
+      'Ganancia': 'ganancia',
+      'Metodo Pago': 'metodo_pago',
+      'Notas': 'notas'
+    }, { widths: { 'Fecha': 12, 'Cliente': 20, 'Servicio': 20, 'Precio Cobrado': 15, 'Costo Estimado': 15, 'Ganancia': 12, 'Metodo Pago': 15, 'Notas': 25 } });
+    showToast('Archivo Excel descargado');
+  });
 
   container.querySelectorAll('.btn-delete-venta').forEach(btn => {
     btn.addEventListener('click', async () => {

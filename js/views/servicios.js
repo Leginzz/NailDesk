@@ -5,6 +5,7 @@
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
+import { exportWithHeaders } from '../utils/export-excel.js';
 
 let insumosCatalog = [];
 let perfilData = null;
@@ -41,7 +42,9 @@ export async function renderServicios() {
         <div class="section-divider"></div>
         <p class="text-sm" style="color:var(--terracota-300)">${servicios?.filter(s => s.activo).length || 0} activos</p>
       </div>
-      <button class="btn btn-primary" id="btn-add-servicio">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" id="btn-export-servicios"><i data-lucide="download" class="w-4 h-4"></i> Excel</button>
+        <button class="btn btn-primary" id="btn-add-servicio">
         <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Servicio
       </button>
     </div>
@@ -105,6 +108,20 @@ export async function renderServicios() {
   if (window.lucide) lucide.createIcons();
 
   document.getElementById('btn-add-servicio').addEventListener('click', () => openServicioModal());
+
+  document.getElementById('btn-export-servicios')?.addEventListener('click', () => {
+    if (!servicios?.length) { showToast('No hay datos para exportar', 'error'); return; }
+    exportWithHeaders(servicios, 'NailDesk-Servicios', {
+      'Servicio': 'nombre',
+      'Tiempo (hrs)': 'tiempo_horas',
+      'Costo Total': 'costo_total',
+      'Ganancia %': 'porcentaje_ganancia',
+      'Precio Sugerido': 'precio_sugerido',
+      'Precio Final': 'precio_redondeado',
+      'Activo': 'activo'
+    }, { widths: { 'Servicio': 25, 'Tiempo (hrs)': 10, 'Costo Total': 12, 'Ganancia %': 10, 'Precio Sugerido': 15, 'Precio Final': 15, 'Activo': 10 } });
+    showToast('Archivo Excel descargado');
+  });
 
   container.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', async () => {

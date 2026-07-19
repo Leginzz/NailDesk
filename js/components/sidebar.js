@@ -22,6 +22,7 @@ const ADMIN_ITEMS = [
   { id: 'admin-planes', label: 'Planes', icon: 'layers' },
   { id: 'admin-ingresos', label: 'Ingresos SaaS', icon: 'trending-up' },
   { id: 'admin-banner', label: 'Config Banner', icon: 'megaphone' },
+  { id: 'admin-users', label: 'Admins', icon: 'shield' },
 ];
 
 function getNavItems() {

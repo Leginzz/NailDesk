@@ -3,6 +3,8 @@
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { openModal, closeModal } from '../../components/modal.js';
+import { showToast } from '../../components/toast.js';
 
 export async function renderAdminSuscripciones() {
   const content = document.getElementById('page-content');
@@ -112,7 +114,9 @@ export async function renderAdminSuscripciones() {
       await openEditSubModal(subId, planes);
     } else if (action === 'change-status') {
       const newStatus = btn.dataset.newStatus;
-      await supabase.from('suscripciones').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', subId);
+      const { error } = await supabase.from('suscripciones').update({ estado: newStatus, updated_at: new Date().toISOString() }).eq('id', subId);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      showToast('Estado actualizado');
       renderAdminSuscripciones();
     }
   });
@@ -159,54 +163,43 @@ async function openEditSubModal(subId, planes) {
   const { data: sub } = await supabase.from('suscripciones').select('*').eq('id', subId).maybeSingle();
   if (!sub) return;
 
-  const content = document.getElementById('modal-content');
-  content.innerHTML = `
-    <div class="p-6">
-      <h3 class="font-display text-lg font-bold text-gray-900 mb-4">Editar Suscripción</h3>
-      <form id="sub-form" class="space-y-4">
+  openModal(``
+    <form id="sub-form" class="space-y-4">
+      <div>
+        <label class="form-label">Plan</label>
+        <select id="sub-plan" class="form-input">
+          $${(planes || []).map(p => `<option value="$${p.id}" $${sub.plan_id === p.id ? 'selected' : ''}>$${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Estado</label>
+        <select id="sub-estado" class="form-input">
+          <option value="trial" $${sub.estado === 'trial' ? 'selected' : ''}>Trial</option>
+          <option value="activo" $${sub.estado === 'activo' ? 'selected' : ''}>Activo</option>
+          <option value="suspendido" $${sub.estado === 'suspendido' ? 'selected' : ''}>Suspendido</option>
+          <option value="cancelado" $${sub.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="form-label">Plan</label>
-          <select id="sub-plan" class="form-input">
-            ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
-          </select>
+          <label class="form-label">Fecha inicio</label>
+          <input type="date" id="sub-fecha-inicio" value="$${sub.fecha_inicio || ''}" class="form-input">
         </div>
         <div>
-          <label class="form-label">Estado</label>
-          <select id="sub-estado" class="form-input">
-            <option value="trial" ${sub.estado === 'trial' ? 'selected' : ''}>Trial</option>
-            <option value="activo" ${sub.estado === 'activo' ? 'selected' : ''}>Activo</option>
-            <option value="suspendido" ${sub.estado === 'suspendido' ? 'selected' : ''}>Suspendido</option>
-            <option value="cancelado" ${sub.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
-          </select>
+          <label class="form-label">Fecha fin</label>
+          <input type="date" id="sub-fecha-fin" value="$${sub.fecha_fin || ''}" class="form-input">
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="form-label">Fecha inicio</label>
-            <input type="date" id="sub-fecha-inicio" value="${sub.fecha_inicio || ''}" class="form-input">
-          </div>
-          <div>
-            <label class="form-label">Fecha fin</label>
-            <input type="date" id="sub-fecha-fin" value="${sub.fecha_fin || ''}" class="form-input">
-          </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="submit" class="btn btn-primary flex-1 justify-center text-sm">Guardar</button>
-          <button type="button" id="close-modal" class="btn btn-ghost flex-1 justify-center text-sm">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  document.getElementById('modal-overlay').classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
-
-  document.getElementById('close-modal')?.addEventListener('click', () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-  });
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" class="btn btn-secondary flex-1" onclick="document.getElementById('modal-close-btn').click()">Cancelar</button>
+        <button type="submit" class="btn btn-primary flex-1">Guardar</button>
+      </div>
+    </form>
+  ``, { title: 'Editar Suscripción' });
 
   document.getElementById('sub-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    await supabase.from('suscripciones').update({
+    const { error } = await supabase.from('suscripciones').update({
       plan_id: document.getElementById('sub-plan').value,
       estado: document.getElementById('sub-estado').value,
       fecha_inicio: document.getElementById('sub-fecha-inicio').value || null,
@@ -214,7 +207,12 @@ async function openEditSubModal(subId, planes) {
       updated_at: new Date().toISOString(),
     }).eq('id', subId);
 
-    document.getElementById('modal-overlay').classList.add('hidden');
+    if (error) {
+      showToast('Error: ' + error.message, 'error');
+      return;
+    }
+    showToast('Suscripción actualizada');
+    closeModal();
     renderAdminSuscripciones();
   });
 }

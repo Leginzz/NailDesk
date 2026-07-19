@@ -1,5 +1,5 @@
-﻿// ============================================================
-// NailDesk — Admin: Users Management View
+// ============================================================
+// NailDesk - Admin: Users Management View
 // ============================================================
 
 import supabase from '../../supabase.js';
@@ -120,7 +120,7 @@ export async function renderAdminUsers() {
 
   container.querySelectorAll('.btn-make-admin').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('¿Hacer admin a este usuario?')) return;
+      if (!confirm('\u00bfHacer admin a este usuario?')) return;
       const { error } = await supabase.from('user_roles').upsert({
         user_id: btn.dataset.uid,
         role: 'admin'
@@ -133,7 +133,7 @@ export async function renderAdminUsers() {
 
   container.querySelectorAll('.btn-remove-admin').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('¿Quitar permisos de admin a este usuario?')) return;
+      if (!confirm('\u00bfQuitar permisos de admin a este usuario?')) return;
       const { error } = await supabase.from('user_roles').update({ role: 'user' }).eq('user_id', btn.dataset.uid);
       if (error) { showToast('Error: ' + error.message, 'error'); return; }
       showToast('Permisos de admin removidos');
