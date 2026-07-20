@@ -32,3 +32,16 @@ CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id);
 INSERT INTO user_roles (user_id, role)
 VALUES ('db2e26d5-fb11-4d7d-bfd4-829763bc84c8', 'admin')
 ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
+
+-- Fix: Trigger auto_admin_first_user con search_path correcto
+CREATE OR REPLACE FUNCTION auto_admin_first_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (SELECT COUNT(*) FROM public.user_roles) = 0 THEN
+    INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'admin');
+  ELSE
+    INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'user');
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

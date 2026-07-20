@@ -143,14 +143,14 @@ ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION auto_admin_first_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF (SELECT COUNT(*) FROM user_roles) = 0 THEN
-    INSERT INTO user_roles (user_id, role) VALUES (NEW.id, 'admin');
+  IF (SELECT COUNT(*) FROM public.user_roles) = 0 THEN
+    INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'admin');
   ELSE
-    INSERT INTO user_roles (user_id, role) VALUES (NEW.id, 'user');
+    INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'user');
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
@@ -164,15 +164,15 @@ RETURNS TRIGGER AS $$
 DECLARE
   free_plan_id UUID;
 BEGIN
-  SELECT id INTO free_plan_id FROM planes_suscripcion WHERE slug = 'free' LIMIT 1;
+  SELECT id INTO free_plan_id FROM public.planes_suscripcion WHERE slug = 'free' LIMIT 1;
   IF free_plan_id IS NOT NULL THEN
-    INSERT INTO suscripciones (user_id, plan_id, estado)
+    INSERT INTO public.suscripciones (user_id, plan_id, estado)
     VALUES (NEW.user_id, free_plan_id, 'trial')
     ON CONFLICT (user_id) DO NOTHING;
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_perfil_created
   AFTER INSERT ON perfiles_negocio
