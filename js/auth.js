@@ -74,38 +74,55 @@ registerForm.addEventListener('submit', async (e) => {
   btn.disabled = true;
   btn.textContent = 'Creando cuenta...';
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    const msg = error.message;
-    if (msg === 'User already registered') showError('Este correo ya esta registrado');
-    else if (msg === 'Unable to validate email address: invalid format') showError('Correo electronico invalido');
-    else if (msg === 'Password should be at least 6 characters') showError('La contraseña debe tener al menos 6 caracteres');
-    else showError(msg);
-    btn.disabled = false;
-    btn.textContent = 'Crear Cuenta';
-    return;
-  }
+  try {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    console.log('signUp response:', { data, error });
 
-  if (data.user) {
-    const { error: profileErr } = await supabase.from('perfiles_negocio').insert({
-      user_id: data.user.id,
-      nombre_salon: salon,
-    });
-    if (profileErr) {
-      console.error('Error creando perfil:', profileErr);
+    if (error) {
+      console.error('signUp error:', error);
+      const msg = error.message || error.msg || String(error);
+      if (msg === 'User already registered') showError('Este correo ya esta registrado');
+      else if (msg === 'Unable to validate email address: invalid format') showError('Correo electronico invalido');
+      else if (msg === 'Password should be at least 6 characters') showError('La contrasena debe tener al menos 6 caracteres');
+      else showError(msg || 'Error desconocido al crear cuenta');
+      btn.disabled = false;
+      btn.textContent = 'Crear Cuenta';
+      return;
     }
 
-    if (data.session) {
-      currentUser = data.user;
-      showApp();
-      window.dispatchEvent(new CustomEvent('auth:ready', { detail: { user: currentUser } }));
+    if (data.user) {
+      console.log('User created:', data.user.id);
+      const { data: profileData, error: profileErr } = await supabase.from('perfiles_negocio').insert({
+        user_id: data.user.id,
+        nombre_salon: salon,
+      }).select();
+      console.log('profile insert:', { profileData, profileErr });
+
+      if (profileErr) {
+        console.error('Profile error:', profileErr);
+        showError('Cuenta creada pero error al crear perfil: ' + (profileErr.message || String(profileErr)));
+        btn.disabled = false;
+        btn.textContent = 'Crear Cuenta';
+        return;
+      }
+
+      if (data.session) {
+        currentUser = data.user;
+        showApp();
+        window.dispatchEvent(new CustomEvent('auth:ready', { detail: { user: currentUser } }));
+      } else {
+        showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta antes de iniciar sesion.');
+        btn.disabled = false;
+        btn.textContent = 'Crear Cuenta';
+      }
     } else {
-      showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta antes de iniciar sesion.');
+      showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta.');
       btn.disabled = false;
       btn.textContent = 'Crear Cuenta';
     }
-  } else {
-    showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta.');
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    showError('Error inesperado: ' + (err.message || String(err)));
     btn.disabled = false;
     btn.textContent = 'Crear Cuenta';
   }
