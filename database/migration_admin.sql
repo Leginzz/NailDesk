@@ -101,7 +101,8 @@ INSERT INTO modulos_sistema (clave, nombre, descripcion, icono, orden) VALUES
   ('costos-fijos', 'Costos Fijos', 'Gastos fijos mensuales',            'receipt',          5),
   ('equipo',       'Equipo',       'Herramientas y depreciación',       'wrench',           6),
   ('extras',       'Extras',       'Servicios adicionales',             'plus-circle',      7),
-  ('ventas',       'Ventas',       'Registro de ventas',                'shopping-cart',    8)
+  ('ventas',       'Ventas',       'Registro de ventas',                'shopping-cart',    8),
+  ('configuracion','Configuración','Configuración del salón',           'settings',         9)
 ON CONFLICT (clave) DO NOTHING;
 
 -- ============================================================
@@ -116,11 +117,11 @@ ON CONFLICT (slug) DO NOTHING;
 -- ============================================================
 -- 7. SEED: Asignar módulos a cada plan
 -- ============================================================
--- Free: solo dashboard + configuración
+-- Free: dashboard + configuración + cotizador
 INSERT INTO plan_modulos (plan_id, modulo_id)
 SELECT p.id, m.id
 FROM planes_suscripcion p, modulos_sistema m
-WHERE p.slug = 'free' AND m.clave IN ('dashboard', 'configuracion')
+WHERE p.slug = 'free' AND m.clave IN ('dashboard', 'configuracion', 'cotizador')
 ON CONFLICT DO NOTHING;
 
 -- Básico: dashboard + servicios + insumos + costos + extras + config

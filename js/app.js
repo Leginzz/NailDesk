@@ -71,6 +71,11 @@ async function navigate(viewId) {
     return;
   }
 
+  if (!AppState.isAdmin && !AppState.isModuleEnabled(viewId)) {
+    navigate('dashboard');
+    return;
+  }
+
   currentView = viewId;
   document.getElementById('page-title').textContent = route.title;
   renderSidebar(viewId);
