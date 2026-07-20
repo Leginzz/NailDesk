@@ -15,7 +15,7 @@ const authError = document.getElementById('auth-error');
 let currentUser = null;
 
 function showError(msg) {
-  authError.textContent = msg;
+  authError.textContent = typeof msg === 'object' ? JSON.stringify(msg) : msg;
   authError.classList.remove('hidden');
 }
 
@@ -70,21 +70,44 @@ registerForm.addEventListener('submit', async (e) => {
   const email = document.getElementById('register-email').value;
   const password = document.getElementById('register-password').value;
 
+  const btn = registerForm.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Creando cuenta...';
+
   const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) {
-    showError(error.message === 'User already registered'
-      ? 'Este correo ya está registrado' : error.message);
+    const msg = error.message;
+    if (msg === 'User already registered') showError('Este correo ya esta registrado');
+    else if (msg === 'Unable to validate email address: invalid format') showError('Correo electronico invalido');
+    else if (msg === 'Password should be at least 6 characters') showError('La contraseña debe tener al menos 6 caracteres');
+    else showError(msg);
+    btn.disabled = false;
+    btn.textContent = 'Crear Cuenta';
     return;
   }
 
   if (data.user) {
-    await supabase.from('perfiles_negocio').insert({
+    const { error: profileErr } = await supabase.from('perfiles_negocio').insert({
       user_id: data.user.id,
       nombre_salon: salon,
     });
-    currentUser = data.user;
-    showApp();
-    window.dispatchEvent(new CustomEvent('auth:ready', { detail: { user: currentUser } }));
+    if (profileErr) {
+      console.error('Error creando perfil:', profileErr);
+    }
+
+    if (data.session) {
+      currentUser = data.user;
+      showApp();
+      window.dispatchEvent(new CustomEvent('auth:ready', { detail: { user: currentUser } }));
+    } else {
+      showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta antes de iniciar sesion.');
+      btn.disabled = false;
+      btn.textContent = 'Crear Cuenta';
+    }
+  } else {
+    showError('Cuenta creada. Revisa tu correo para confirmar tu cuenta.');
+    btn.disabled = false;
+    btn.textContent = 'Crear Cuenta';
   }
 });
 
