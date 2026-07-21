@@ -74,9 +74,9 @@ CREATE INDEX IF NOT EXISTS idx_plan_modulos_plan ON plan_modulos(plan_id);
 -- ============================================================
 -- 3. TRIGGERS de updated_at
 -- ============================================================
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON planes_suscripcion
+CREATE TRIGGER IF NOT EXISTS set_updated_at BEFORE UPDATE ON planes_suscripcion
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON suscripciones
+CREATE TRIGGER IF NOT EXISTS set_updated_at BEFORE UPDATE ON suscripciones
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================
@@ -153,7 +153,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-CREATE TRIGGER on_auth_user_created
+CREATE TRIGGER IF NOT EXISTS on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION auto_admin_first_user();
 
@@ -175,7 +175,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-CREATE TRIGGER on_perfil_created
+CREATE TRIGGER IF NOT EXISTS on_perfil_created
   AFTER INSERT ON perfiles_negocio
   FOR EACH ROW EXECUTE FUNCTION auto_free_subscription();
 
