@@ -15,12 +15,15 @@ export async function renderServicios() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const [servRes, insumosRes, siRes, perfilRes, resumenRes] = await Promise.all([
-    supabase.from('servicios').select('*').order('created_at', { ascending: false }),
-    supabase.from('insumos').select('*').eq('activo', true).order('producto'),
-    supabase.from('servicio_insumos').select('*'),
-    supabase.from('perfiles_negocio').select('tarifa_mano_obra_hora, horas_trabajo_mes').single(),
-    supabase.from('vista_resumen_negocio').select('costo_fijo_por_hora').single(),
+    supabase.from('servicios').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('insumos').select('*').eq('user_id', user.id).eq('activo', true).order('producto'),
+    supabase.from('servicio_insumos').select('*').eq('user_id', user.id),
+    supabase.from('perfiles_negocio').select('tarifa_mano_obra_hora, horas_trabajo_mes').eq('user_id', user.id).maybeSingle(),
+    supabase.from('vista_resumen_negocio').select('costo_fijo_por_hora').eq('user_id', user.id).maybeSingle(),
   ]);
 
   insumosCatalog = insumosRes.data || [];

@@ -11,11 +11,26 @@ export async function renderConfiguracion() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const perfilRes = await supabase.from('perfiles_negocio').select('*');
-  const { data: horarios } = await supabase.from('horario_negocio').select('*').order('dia_semana');
-  const perfil = perfilRes.data?.[0] || null;
-  console.log('perfil load:', perfilRes);
-  console.log('perfil data:', perfil);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { showToast('Sesión no válida', 'error'); return; }
+
+  const { data: perfil, error: perfilErr } = await supabase.from('perfiles_negocio').select('*').eq('user_id', user.id).single();
+  console.log('perfil load:', { perfil, perfilErr });
+
+  if (!perfil || perfilErr) {
+    const { data: newPerfil } = await supabase.from('perfiles_negocio').insert({
+      user_id: user.id,
+      nombre_salon: 'Mi Salón',
+    }).select().single();
+    if (newPerfil) {
+      window.location.reload();
+      return;
+    }
+    showToast('Error al cargar perfil', 'error');
+    return;
+  }
+
+  const { data: horarios } = await supabase.from('horario_negocio').select('*').eq('user_id', user.id).order('dia_semana');
 
   // Fill missing days
   const horarioMap = {};

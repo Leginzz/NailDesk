@@ -110,10 +110,13 @@ export async function renderVentas() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const [ventasRes, serviciosRes, extrasRes] = await Promise.all([
-    supabase.from('ventas').select('*').order('fecha', { ascending: false }),
-    supabase.from('servicios').select('id, nombre, precio_redondeado, costo_total').eq('activo', true),
-    supabase.from('venta_extras').select('*, extra:extras(nombre, precio_redondeado)'),
+    supabase.from('ventas').select('*').eq('user_id', user.id).order('fecha', { ascending: false }),
+    supabase.from('servicios').select('id, nombre, precio_redondeado, costo_total').eq('user_id', user.id).eq('activo', true),
+    supabase.from('venta_extras').select('*, extra:extras(nombre, precio_redondeado)').eq('user_id', user.id),
   ]);
 
   allVentas = ventasRes.data || [];

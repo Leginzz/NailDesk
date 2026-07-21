@@ -11,7 +11,10 @@ export async function renderInsumos() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const { data: insumos } = await supabase.from('insumos').select('*').order('created_at', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: insumos } = await supabase.from('insumos').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
 
   container.innerHTML = `
     <div class="section-header animate-in">

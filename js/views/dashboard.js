@@ -11,14 +11,18 @@ export async function renderDashboard() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const { data: perfil } = await supabase.from('vista_resumen_negocio').select('*').single();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: perfil } = await supabase.from('vista_resumen_negocio').select('*').eq('user_id', user.id).maybeSingle();
   const { data: ventas } = await supabase.from('ventas')
     .select('precio_cobrado, costo_estimado, fecha, metodo_pago, cliente_nombre, servicio_nombre')
+    .eq('user_id', user.id)
     .order('fecha', { ascending: false }).limit(30);
   const { data: servicios } = await supabase.from('servicios')
-    .select('nombre, precio_redondeado, tiempo_horas').eq('activo', true);
+    .select('nombre, precio_redondeado, tiempo_horas').eq('user_id', user.id).eq('activo', true);
   const { data: insumos } = await supabase.from('insumos')
-    .select('producto, stock_actual, costo_por_uso').eq('activo', true).order('stock_actual', { ascending: true });
+    .select('producto, stock_actual, costo_por_uso').eq('user_id', user.id).eq('activo', true).order('stock_actual', { ascending: true });
 
   const totalVentas = ventas?.reduce((s, v) => s + (Number(v.precio_cobrado) || 0), 0) || 0;
   const totalCostos = ventas?.reduce((s, v) => s + (Number(v.costo_estimado) || 0), 0) || 0;

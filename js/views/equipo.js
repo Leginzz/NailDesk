@@ -10,7 +10,10 @@ export async function renderEquipo() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const { data: equipo } = await supabase.from('equipo_herramientas').select('*').order('created_at', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: equipo } = await supabase.from('equipo_herramientas').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
   const totalEquipo = equipo?.reduce((s, e) => s + Number(e.costo_compra), 0) || 0;
 
   container.innerHTML = `

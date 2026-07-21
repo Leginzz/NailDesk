@@ -11,7 +11,10 @@ export async function renderCostosFijos() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const { data: costos } = await supabase.from('costos_fijos').select('*').order('created_at', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: costos } = await supabase.from('costos_fijos').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
   const total = costos?.filter(c => c.activo).reduce((s, c) => s + Number(c.costo_mensual), 0) || 0;
 
   const iconMap = { 'Renta': 'home', 'Luz': 'zap', 'Agua': 'droplets', 'Internet': 'wifi', 'Publicidad': 'megaphone' };

@@ -22,13 +22,16 @@ export async function renderCotizador() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const [perfilRes, serviciosRes, extrasRes, siRes, iRes, resumenRes] = await Promise.all([
-    supabase.from('perfiles_negocio').select('*').single(),
-    supabase.from('servicios').select('*').eq('activo', true).order('nombre'),
-    supabase.from('extras').select('*').eq('activo', true).order('nombre'),
-    supabase.from('servicio_insumos').select('*, insumos(*)'),
-    supabase.from('insumos').select('*').eq('activo', true),
-    supabase.from('vista_resumen_negocio').select('*').single(),
+    supabase.from('perfiles_negocio').select('*').eq('user_id', user.id).maybeSingle(),
+    supabase.from('servicios').select('*').eq('user_id', user.id).eq('activo', true).order('nombre'),
+    supabase.from('extras').select('*').eq('user_id', user.id).eq('activo', true).order('nombre'),
+    supabase.from('servicio_insumos').select('*, insumos(*)').eq('user_id', user.id),
+    supabase.from('insumos').select('*').eq('user_id', user.id).eq('activo', true),
+    supabase.from('vista_resumen_negocio').select('*').eq('user_id', user.id).maybeSingle(),
   ]);
 
   perfil = perfilRes.data;

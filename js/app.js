@@ -121,7 +121,7 @@ window.addEventListener('auth:ready', async (e) => {
     }
   }
 
-  const { data: perfil } = await supabase.from('perfiles_negocio').select('nombre_salon').single();
+  const { data: perfil } = await supabase.from('perfiles_negocio').select('nombre_salon').eq('user_id', user.id).maybeSingle();
   updateSalonName(perfil?.nombre_salon || 'Mi Salón');
 
   navigate(getHashView());
