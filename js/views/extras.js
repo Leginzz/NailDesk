@@ -5,6 +5,7 @@
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderExtras() {
   const container = document.getElementById('page-content');
@@ -25,7 +26,7 @@ export async function renderExtras() {
       ${extras?.map(ex => `
         <div class="card p-5 group">
           <div class="flex items-start justify-between mb-3">
-            <h3 class="font-semibold" style="color:var(--charcoal)">${ex.nombre}</h3>
+            <h3 class="font-semibold" style="color:var(--charcoal)">${escapeHtml(ex.nombre)}</h3>
             <span class="badge ${ex.activo ? 'badge-success' : 'badge-danger'}">${ex.activo ? 'Activo' : 'Inactivo'}</span>
           </div>
           <div class="space-y-2">
@@ -46,7 +47,7 @@ export async function renderExtras() {
 
   if (window.lucide) lucide.createIcons();
 
-  document.getElementById('btn-add-extra').addEventListener('click', () => openExtraModal());
+  document.getElementById('btn-add-extra').addEventListener('click', () => openExtraModal(null, user));
 
   container.querySelectorAll('.btn-edit-extra').forEach(btn => {
     btn.addEventListener('click', () => { const ex = extras.find(x => x.id === btn.dataset.id); if (ex) openExtraModal(ex); });
@@ -61,7 +62,7 @@ export async function renderExtras() {
   });
 }
 
-function openExtraModal(extra = null) {
+function openExtraModal(extra = null, user = null) {
   const isEdit = !!extra;
   openModal(`
     <form id="extra-form" class="space-y-4">
@@ -91,7 +92,7 @@ function openExtraModal(extra = null) {
       precio_redondeado: Number(document.getElementById('ex-precio').value),
     };
     if (isEdit) { await supabase.from('extras').update(data).eq('id', extra.id); showToast('Extra actualizado'); }
-    else { await supabase.from('extras').insert(data); showToast('Extra creado'); }
+    else { await supabase.from('extras').insert({ ...data, user_id: user?.id }); showToast('Extra creado'); }
     closeModal(); renderExtras();
   });
 }

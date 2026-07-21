@@ -84,7 +84,14 @@ async function navigate(viewId) {
     history.pushState(null, '', `#/${viewId}`);
   }
 
-  await route.render();
+  try {
+    await route.render();
+  } catch (err) {
+    console.error('View render error:', err);
+    const content = document.getElementById('page-content');
+    if (content) content.innerHTML = '<div class="text-center py-20 text-red-400"><i data-lucide="alert-triangle" class="w-12 h-12 mx-auto mb-3"></i><p>Error al cargar esta sección</p></div>';
+    if (window.lucide) lucide.createIcons();
+  }
 }
 
 function getHashView() {

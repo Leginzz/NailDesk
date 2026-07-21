@@ -6,10 +6,13 @@ import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 import { exportWithHeaders } from '../utils/export-excel.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 let allVentas = [];
 let allServicios = [];
 let currentFilters = { periodo: 'mes', servicioId: '', metodo: '', fechaDesde: '', fechaHasta: '' };
+let _ventasChart = null;
+let _topServChart = null;
 
 const PERIODOS = [
   { key: 'hoy', label: 'Hoy' },
@@ -244,8 +247,8 @@ export async function renderVentas() {
                 return `
                 <tr class="border-b border-gray-50 hover:bg-gray-50/50">
                   <td class="px-4 py-3 text-gray-500">${new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit' })}</td>
-                  <td class="px-4 py-3 font-medium text-gray-900">${v.cliente_nombre || 'Sin nombre'}</td>
-                  <td class="px-4 py-3 text-gray-600">${v.servicio_nombre || '-'}</td>
+                   <td class="px-4 py-3 font-medium text-gray-900">${escapeHtml(v.cliente_nombre) || 'Sin nombre'}</td>
+                  <td class="px-4 py-3 text-gray-600">${escapeHtml(v.servicio_nombre) || '-'}</td>
                   <td class="px-4 py-3 text-right font-bold text-gray-900">$${Number(v.precio_cobrado).toLocaleString('es-MX')}</td>
                   <td class="px-4 py-3 text-right font-semibold ${Number(v.ganancia) >= 0 ? 'text-green-700' : 'text-red-600'}">$${Number(v.ganancia).toLocaleString('es-MX')}</td>
                   <td class="px-4 py-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">${v.metodo_pago}</span></td>
@@ -276,7 +279,7 @@ export async function renderVentas() {
   renderTopServiciosChart(topServ);
   bindFilterEvents(ventaExtrasMap);
 
-  document.getElementById('btn-add-venta').addEventListener('click', () => openVentaModal());
+  document.getElementById('btn-add-venta').addEventListener('click', () => openVentaModal(null, user));
   document.getElementById('btn-export-ventas')?.addEventListener('click', () => {
     if (!filtered.length) { showToast('No hay datos para exportar', 'error'); return; }
     exportWithHeaders(filtered, 'NailDesk-Ventas', {
@@ -339,6 +342,7 @@ function bindFilterEvents() {
 function renderVentasChart(byPeriod) {
   const ctx = document.getElementById('chart-ventas-periodo');
   if (!ctx) return;
+  if (_ventasChart) { _ventasChart.destroy(); _ventasChart = null; }
 
   const labels = byPeriod.map(([k]) => {
     const [y, m] = k.split('-');
@@ -346,7 +350,7 @@ function renderVentasChart(byPeriod) {
     return d.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
   });
 
-  new Chart(ctx, {
+  _ventasChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
@@ -373,8 +377,9 @@ function renderVentasChart(byPeriod) {
 function renderTopServiciosChart(topServ) {
   const ctx = document.getElementById('chart-top-servicios');
   if (!ctx) return;
+  if (_topServChart) { _topServChart.destroy(); _topServChart = null; }
 
-  new Chart(ctx, {
+  _topServChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: topServ.map(s => s.nombre.length > 18 ? s.nombre.slice(0, 16) + '...' : s.nombre),
@@ -399,7 +404,7 @@ function renderTopServiciosChart(topServ) {
   });
 }
 
-function openVentaModal(venta = null) {
+function openVentaModal(venta = null, user = null) {
   const isEdit = !!venta;
   const today = new Date().toISOString().split('T')[0];
 
@@ -464,7 +469,7 @@ function openVentaModal(venta = null) {
       await supabase.from('ventas').update(payload).eq('id', venta.id);
       showToast('Venta actualizada');
     } else {
-      await supabase.from('ventas').insert(payload);
+      await supabase.from('ventas').insert({ ...payload, user_id: user?.id });
       showToast('Venta registrada');
     }
     closeModal();

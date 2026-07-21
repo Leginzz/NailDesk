@@ -6,6 +6,7 @@ import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 import { exportWithHeaders } from '../utils/export-excel.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderCostosFijos() {
   const container = document.getElementById('page-content');
@@ -42,7 +43,7 @@ export async function renderCostosFijos() {
               <i data-lucide="${iconMap[icon] || 'circle-dollar-sign'}" class="w-5 h-5" style="color:var(--terracota-400)"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--terracota-400)">${c.concepto}</p>
+               <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--terracota-400)">${escapeHtml(c.concepto)}</p>
               <p class="text-xl font-bold mt-1" style="color:var(--charcoal)">$${Number(c.costo_mensual).toLocaleString('es-MX')}</p>
             </div>
           </div>
@@ -59,7 +60,7 @@ export async function renderCostosFijos() {
 
   if (window.lucide) lucide.createIcons();
 
-  document.getElementById('btn-add-costo').addEventListener('click', () => openCostoModal());
+  document.getElementById('btn-add-costo').addEventListener('click', () => openCostoModal(null, user));
 
   document.getElementById('btn-export-costos')?.addEventListener('click', () => {
     if (!costos?.length) { showToast('No hay datos para exportar', 'error'); return; }
@@ -84,7 +85,7 @@ export async function renderCostosFijos() {
   });
 }
 
-function openCostoModal(costo = null) {
+function openCostoModal(costo = null, user = null) {
   const isEdit = !!costo;
   openModal(`
     <form id="costo-form" class="space-y-4">
@@ -101,7 +102,7 @@ function openCostoModal(costo = null) {
     e.preventDefault();
     const data = { concepto: document.getElementById('c-concepto').value, costo_mensual: Number(document.getElementById('c-monto').value) };
     if (isEdit) { await supabase.from('costos_fijos').update(data).eq('id', costo.id); showToast('Costo actualizado'); }
-    else { await supabase.from('costos_fijos').insert(data); showToast('Costo creado'); }
+    else { await supabase.from('costos_fijos').insert({ ...data, user_id: user?.id }); showToast('Costo creado'); }
     closeModal(); renderCostosFijos();
   });
 }

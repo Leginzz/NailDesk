@@ -5,6 +5,7 @@
 import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderEquipo() {
   const container = document.getElementById('page-content');
@@ -33,7 +34,7 @@ export async function renderEquipo() {
           <tbody>
             ${equipo?.map(e => `
               <tr>
-                <td class="font-semibold" style="color:var(--charcoal)">${e.herramienta}</td>
+                <td class="font-semibold" style="color:var(--charcoal)">${escapeHtml(e.herramienta)}</td>
                 <td>$${Number(e.costo_compra).toLocaleString('es-MX')}</td>
                 <td><span class="badge badge-info">${e.vida_util_servicios.toLocaleString()} usos</span></td>
                 <td class="font-bold" style="color:var(--terracota-600)">$${Number(e.costo_por_servicio).toFixed(2)}</td>
@@ -55,7 +56,7 @@ export async function renderEquipo() {
 
   if (window.lucide) lucide.createIcons();
 
-  document.getElementById('btn-add-equipo').addEventListener('click', () => openEquipoModal());
+  document.getElementById('btn-add-equipo').addEventListener('click', () => openEquipoModal(null, user));
 
   container.querySelectorAll('.btn-edit-eq').forEach(btn => {
     btn.addEventListener('click', () => { const e = equipo.find(x => x.id === btn.dataset.id); if (e) openEquipoModal(e); });
@@ -70,7 +71,7 @@ export async function renderEquipo() {
   });
 }
 
-function openEquipoModal(item = null) {
+function openEquipoModal(item = null, user = null) {
   const isEdit = !!item;
   openModal(`
     <form id="equipo-form" class="space-y-4">
@@ -95,7 +96,7 @@ function openEquipoModal(item = null) {
       vida_util_servicios: Number(document.getElementById('e-vida').value),
     };
     if (isEdit) { await supabase.from('equipo_herramientas').update(data).eq('id', item.id); showToast('Herramienta actualizada'); }
-    else { await supabase.from('equipo_herramientas').insert(data); showToast('Herramienta creada'); }
+    else { await supabase.from('equipo_herramientas').insert({ ...data, user_id: user?.id }); showToast('Herramienta creada'); }
     closeModal(); renderEquipo();
   });
 }

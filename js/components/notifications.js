@@ -4,6 +4,7 @@
 
 import supabase from '../supabase.js';
 import AppState from '../services/app-state.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 let notifOpen = false;
 
@@ -67,8 +68,8 @@ async function renderNotifications() {
           <i data-lucide="${n.tipo === 'nuevo_registro' ? 'user-plus' : 'bell'}" class="w-4 h-4 ${n.tipo === 'nuevo_registro' ? 'text-green-600' : 'text-terracota-600'}"></i>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900">${n.titulo}</p>
-          <p class="text-xs text-gray-500 mt-0.5 truncate">${n.mensaje || ''}</p>
+          <p class="text-sm font-medium text-gray-900">${escapeHtml(n.titulo)}</p>
+          <p class="text-xs text-gray-500 mt-0.5 truncate">${escapeHtml(n.mensaje) || ''}</p>
           <p class="text-[11px] text-gray-400 mt-1">${formatTime(n.created_at)}</p>
         </div>
         ${!n.leido ? '<div class="w-2 h-2 rounded-full bg-terracota-500 flex-shrink-0 mt-2"></div>' : ''}
@@ -102,7 +103,16 @@ function formatTime(dateStr) {
   return `Hace ${days}d`;
 }
 
+let _notifInitialized = false;
+let _notifInterval = null;
+
 export function initNotifications() {
+  if (_notifInitialized) {
+    loadNotifications();
+    return;
+  }
+  _notifInitialized = true;
+
   const btn = document.getElementById('btn-notifications');
   const dropdown = document.getElementById('notif-dropdown');
   if (!btn || !dropdown) return;
@@ -119,7 +129,6 @@ export function initNotifications() {
     }
   });
 
-  // Mark all as read
   document.getElementById('btn-mark-all-read')?.addEventListener('click', async () => {
     await supabase.from('notificaciones').update({ leido: true }).eq('leido', false);
     await renderNotifications();
@@ -128,6 +137,6 @@ export function initNotifications() {
 
   loadNotifications();
 
-  // Refresh every 30s
-  setInterval(loadNotifications, 30000);
+  if (_notifInterval) clearInterval(_notifInterval);
+  _notifInterval = setInterval(loadNotifications, 30000);
 }

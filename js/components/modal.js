@@ -27,9 +27,6 @@ export function openModal(html, options = {}) {
   if (window.lucide) lucide.createIcons();
 
   document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
 }
 
 export function closeModal() {
@@ -40,9 +37,13 @@ export function closeModal() {
   onCloseCallback = null;
 }
 
-// Close on Escape
+// Close on Escape + overlay click (registered once)
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
     closeModal();
   }
+});
+
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay) closeModal();
 });

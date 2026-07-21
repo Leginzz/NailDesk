@@ -6,6 +6,7 @@ import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 import { exportWithHeaders } from '../utils/export-excel.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderInsumos() {
   const container = document.getElementById('page-content');
@@ -37,8 +38,8 @@ export async function renderInsumos() {
           <tbody>
             ${insumos?.map(i => `
               <tr>
-                <td class="font-semibold" style="color:var(--charcoal)">${i.producto}</td>
-                <td style="color:var(--terracota-400)">${i.presentacion || '-'}</td>
+                <td class="font-semibold" style="color:var(--charcoal)">${escapeHtml(i.producto)}</td>
+                <td style="color:var(--terracota-400)">${escapeHtml(i.presentacion) || '-'}</td>
                 <td>$${Number(i.costo_compra).toFixed(2)}</td>
                 <td><span class="badge badge-info">${i.rendimiento} usos</span></td>
                 <td class="font-bold" style="color:var(--terracota-600)">$${Number(i.costo_por_uso).toFixed(2)}</td>
@@ -61,7 +62,7 @@ export async function renderInsumos() {
 
   if (window.lucide) lucide.createIcons();
 
-  document.getElementById('btn-add-insumo').addEventListener('click', () => openInsumoModal());
+  document.getElementById('btn-add-insumo').addEventListener('click', () => openInsumoModal(null, user));
 
   document.getElementById('btn-export-insumos')?.addEventListener('click', () => {
     if (!insumos?.length) { showToast('No hay datos para exportar', 'error'); return; }
@@ -93,7 +94,7 @@ export async function renderInsumos() {
   });
 }
 
-function openInsumoModal(item = null) {
+function openInsumoModal(item = null, user = null) {
   const isEdit = !!item;
   openModal(`
     <form id="insumo-form" class="space-y-4">
@@ -121,7 +122,7 @@ function openInsumoModal(item = null) {
       stock_actual: Number(document.getElementById('i-stock').value),
     };
     if (isEdit) { await supabase.from('insumos').update(data).eq('id', item.id); showToast('Insumo actualizado'); }
-    else { await supabase.from('insumos').insert(data); showToast('Insumo creado'); }
+    else { await supabase.from('insumos').insert({ ...data, user_id: user?.id }); showToast('Insumo creado'); }
     closeModal(); renderInsumos();
   });
 }
