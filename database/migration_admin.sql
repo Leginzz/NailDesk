@@ -193,26 +193,42 @@ ALTER TABLE plan_modulos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE suscripciones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE salon_modulos ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_roles_select_own" ON user_roles;
 CREATE POLICY "user_roles_select_own" ON user_roles FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "user_roles_admin_select_all" ON user_roles;
 CREATE POLICY "user_roles_admin_select_all" ON user_roles FOR SELECT USING (is_admin());
+DROP POLICY IF EXISTS "user_roles_admin_insert" ON user_roles;
 CREATE POLICY "user_roles_admin_insert" ON user_roles FOR INSERT WITH CHECK (is_admin());
+DROP POLICY IF EXISTS "user_roles_admin_update" ON user_roles;
 CREATE POLICY "user_roles_admin_update" ON user_roles FOR UPDATE USING (is_admin());
 
+DROP POLICY IF EXISTS "modulos_select_all" ON modulos_sistema;
 CREATE POLICY "modulos_select_all" ON modulos_sistema FOR SELECT USING (true);
+DROP POLICY IF EXISTS "modulos_admin_manage" ON modulos_sistema;
 CREATE POLICY "modulos_admin_manage" ON modulos_sistema FOR ALL USING (is_admin());
 
+DROP POLICY IF EXISTS "planes_select_all" ON planes_suscripcion;
 CREATE POLICY "planes_select_all" ON planes_suscripcion FOR SELECT USING (true);
+DROP POLICY IF EXISTS "planes_admin_manage" ON planes_suscripcion;
 CREATE POLICY "planes_admin_manage" ON planes_suscripcion FOR ALL USING (is_admin());
 
+DROP POLICY IF EXISTS "plan_modulos_select_all" ON plan_modulos;
 CREATE POLICY "plan_modulos_select_all" ON plan_modulos FOR SELECT USING (true);
+DROP POLICY IF EXISTS "plan_modulos_admin_manage" ON plan_modulos;
 CREATE POLICY "plan_modulos_admin_manage" ON plan_modulos FOR ALL USING (is_admin());
 
+DROP POLICY IF EXISTS "suscripciones_select_own" ON suscripciones;
 CREATE POLICY "suscripciones_select_own" ON suscripciones FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "suscripciones_admin_select_all" ON suscripciones;
 CREATE POLICY "suscripciones_admin_select_all" ON suscripciones FOR SELECT USING (is_admin());
+DROP POLICY IF EXISTS "suscripciones_admin_manage" ON suscripciones;
 CREATE POLICY "suscripciones_admin_manage" ON suscripciones FOR ALL USING (is_admin());
 
+DROP POLICY IF EXISTS "salon_modulos_select_own" ON salon_modulos;
 CREATE POLICY "salon_modulos_select_own" ON salon_modulos FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "salon_modulos_admin_select_all" ON salon_modulos;
 CREATE POLICY "salon_modulos_admin_select_all" ON salon_modulos FOR SELECT USING (is_admin());
+DROP POLICY IF EXISTS "salon_modulos_admin_manage" ON salon_modulos;
 CREATE POLICY "salon_modulos_admin_manage" ON salon_modulos FOR ALL USING (is_admin());
 
 -- ============================================================
