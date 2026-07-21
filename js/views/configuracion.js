@@ -15,7 +15,6 @@ export async function renderConfiguracion() {
   if (!user) { showToast('Sesión no válida', 'error'); return; }
 
   const { data: perfil, error: perfilErr } = await supabase.from('perfiles_negocio').select('*').eq('user_id', user.id).single();
-  console.log('perfil load:', { perfil, perfilErr });
 
   if (!perfil || perfilErr) {
     const { data: newPerfil } = await supabase.from('perfiles_negocio').insert({
@@ -169,16 +168,12 @@ export async function renderConfiguracion() {
       horas_trabajo_mes: Number(document.getElementById('cfg-horas').value),
     };
 
-    console.log('perfil:', perfil);
-    console.log('perfilData:', perfilData);
-
     if (!perfil || !perfil.id) {
       showToast('Error: no se encontró el perfil', 'error');
       return;
     }
 
     const { data, error } = await supabase.from('perfiles_negocio').update(perfilData).eq('user_id', perfil.user_id).select();
-    console.log('update result:', { data, error });
 
     if (error) {
       showToast('Error al guardar perfil: ' + error.message, 'error');
