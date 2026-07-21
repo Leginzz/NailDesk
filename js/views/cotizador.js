@@ -347,90 +347,86 @@ function calcularCostoExtra(extraId) {
   };
 }
 
+let _cotEventsBound = false;
+
 function bindEvents() {
-  document.getElementById('cot-add-servicio')?.addEventListener('change', (e) => {
-    const id = e.target.value;
-    if (!id) return;
-    const item = calcularCostos(id);
-    if (item) {
-      items.push(item);
-      refresh();
+  if (_cotEventsBound) return;
+  _cotEventsBound = true;
+
+  const container = document.getElementById('page-content');
+
+  container.addEventListener('change', (e) => {
+    if (e.target.id === 'cot-add-servicio') {
+      const id = e.target.value;
+      if (!id) return;
+      const item = calcularCostos(id);
+      if (item) { items.push(item); refresh(); }
+      e.target.value = '';
+    } else if (e.target.id === 'cot-add-extra') {
+      const id = e.target.value;
+      if (!id) return;
+      const item = calcularCostoExtra(id);
+      if (item) { items.push(item); refresh(); }
+      e.target.value = '';
     }
-    e.target.value = '';
   });
 
-  document.getElementById('cot-add-extra')?.addEventListener('change', (e) => {
-    const id = e.target.value;
-    if (!id) return;
-    const item = calcularCostoExtra(id);
-    if (item) {
-      items.push(item);
-      refresh();
-    }
-    e.target.value = '';
-  });
-
-  document.querySelectorAll('.cot-price-input').forEach(input => {
-    input.addEventListener('input', (e) => {
+  container.addEventListener('input', (e) => {
+    if (e.target.classList.contains('cot-price-input')) {
       const idx = parseInt(e.target.dataset.idx);
       items[idx].precio = Number(e.target.value) || 0;
       refreshPreview();
-    });
-  });
-
-  document.querySelectorAll('.cot-remove-item').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const idx = parseInt(btn.dataset.idx);
-      items.splice(idx, 1);
-      refresh();
-    });
-  });
-
-  document.getElementById('cot-iva-toggle')?.addEventListener('click', function() {
-    conIVA = !conIVA;
-    this.classList.toggle('active');
-    refreshPreview();
-  });
-
-  document.getElementById('cot-cliente')?.addEventListener('input', (e) => {
-    clienteNombre = e.target.value;
-    document.getElementById('cot-preview-cliente').textContent = clienteNombre || 'Cliente';
-  });
-
-  document.getElementById('cot-notas')?.addEventListener('input', (e) => {
-    notasCotizacion = e.target.value;
-    const invoice = document.getElementById('cotizador-invoice');
-    const existingNotes = invoice.querySelector('.cot-notes');
-    if (existingNotes) existingNotes.remove();
-    if (notasCotizacion) {
-      const div = document.createElement('div');
-      div.className = 'cot-notes mt-3 p-3 rounded-lg text-xs';
-      div.style.cssText = 'background:var(--terracota-50); color:var(--terracota-600)';
-      div.innerHTML = `<strong>Notas:</strong> ${notasCotizacion}`;
-      invoice.appendChild(div);
+    } else if (e.target.id === 'cot-cliente') {
+      clienteNombre = e.target.value;
+      document.getElementById('cot-preview-cliente').textContent = clienteNombre || 'Cliente';
+    } else if (e.target.id === 'cot-notas') {
+      notasCotizacion = e.target.value;
+      const invoice = document.getElementById('cotizador-invoice');
+      const existingNotes = invoice?.querySelector('.cot-notes');
+      if (existingNotes) existingNotes.remove();
+      if (notasCotizacion && invoice) {
+        const div = document.createElement('div');
+        div.className = 'cot-notes mt-3 p-3 rounded-lg text-xs';
+        div.style.cssText = 'background:var(--terracota-50); color:var(--terracota-600)';
+        div.innerHTML = `<strong>Notas:</strong> ${notasCotizacion}`;
+        invoice.appendChild(div);
+      }
     }
   });
 
-  document.querySelectorAll('.cotizador-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
+  container.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.cot-remove-item');
+    if (removeBtn) {
+      const idx = parseInt(removeBtn.dataset.idx);
+      items.splice(idx, 1);
+      refresh();
+      return;
+    }
+    if (e.target.closest('#cot-iva-toggle')) {
+      conIVA = !conIVA;
+      e.target.closest('#cot-iva-toggle').classList.toggle('active');
+      refreshPreview();
+      return;
+    }
+    if (e.target.closest('#cot-btn-guardar')) { saveCotizacion(); return; }
+    if (e.target.closest('#cot-btn-pdf')) { exportPDF(); return; }
+    if (e.target.closest('#cot-btn-nueva')) {
+      items = [];
+      clienteNombre = '';
+      notasCotizacion = '';
+      conIVA = false;
+      refresh();
+      showToast('Nueva cotización', 'info');
+      return;
+    }
+    const tab = e.target.closest('.cotizador-tab');
+    if (tab) {
       document.querySelectorAll('.cotizador-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       const target = tab.dataset.tab;
       document.getElementById('cotizador-constructor').style.display = target === 'constructor' ? '' : 'none';
       document.getElementById('cotizador-preview').style.display = target === 'preview' ? '' : 'none';
-    });
-  });
-
-  document.getElementById('cot-btn-guardar')?.addEventListener('click', saveCotizacion);
-  document.getElementById('cot-btn-pdf')?.addEventListener('click', exportPDF);
-
-  document.getElementById('cot-btn-nueva')?.addEventListener('click', () => {
-    items = [];
-    clienteNombre = '';
-    notasCotizacion = '';
-    conIVA = false;
-    refresh();
-    showToast('Nueva cotización', 'info');
+    }
   });
 }
 
@@ -447,23 +443,6 @@ function refreshPreview() {
   const previewFooter = document.getElementById('cot-preview-totals');
   if (previewBody) previewBody.innerHTML = renderPreviewItems();
   if (previewFooter) previewFooter.innerHTML = renderPreviewTotals();
-
-  document.querySelectorAll('.cot-price-input').forEach(input => {
-    input.addEventListener('input', (e) => {
-      const idx = parseInt(e.target.dataset.idx);
-      items[idx].precio = Number(e.target.value) || 0;
-      refreshPreview();
-    });
-  });
-
-  document.querySelectorAll('.cot-remove-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.idx);
-      items.splice(idx, 1);
-      refresh();
-    });
-  });
-
   if (window.lucide) lucide.createIcons();
 }
 
