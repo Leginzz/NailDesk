@@ -141,7 +141,6 @@ export async function renderConfiguracion() {
   document.getElementById('config-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Save profile
     const perfilData = {
       nombre_salon: document.getElementById('cfg-nombre').value,
       telefono: document.getElementById('cfg-telefono').value || null,
@@ -151,7 +150,22 @@ export async function renderConfiguracion() {
       tarifa_mano_obra_hora: Number(document.getElementById('cfg-tarifa').value),
       horas_trabajo_mes: Number(document.getElementById('cfg-horas').value),
     };
-    await supabase.from('perfiles_negocio').update(perfilData).eq('id', perfil.id);
+
+    console.log('perfil:', perfil);
+    console.log('perfilData:', perfilData);
+
+    if (!perfil || !perfil.id) {
+      showToast('Error: no se encontró el perfil', 'error');
+      return;
+    }
+
+    const { data, error } = await supabase.from('perfiles_negocio').update(perfilData).eq('id', perfil.id).select();
+    console.log('update result:', { data, error });
+
+    if (error) {
+      showToast('Error al guardar perfil: ' + error.message, 'error');
+      return;
+    }
 
     // Save horarios
     for (let dia = 0; dia < 7; dia++) {
