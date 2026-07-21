@@ -11,10 +11,11 @@ export async function renderConfiguracion() {
   const container = document.getElementById('page-content');
   container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
 
-  const perfilRes = await supabase.from('perfiles_negocio').select('*').single();
+  const perfilRes = await supabase.from('perfiles_negocio').select('*');
   const { data: horarios } = await supabase.from('horario_negocio').select('*').order('dia_semana');
-  const perfil = perfilRes.data;
+  const perfil = perfilRes.data?.[0] || null;
   console.log('perfil load:', perfilRes);
+  console.log('perfil data:', perfil);
 
   // Fill missing days
   const horarioMap = {};
@@ -161,7 +162,7 @@ export async function renderConfiguracion() {
       return;
     }
 
-    const { data, error } = await supabase.from('perfiles_negocio').update(perfilData).eq('id', perfil.id).select();
+    const { data, error } = await supabase.from('perfiles_negocio').update(perfilData).eq('user_id', perfil.user_id).select();
     console.log('update result:', { data, error });
 
     if (error) {
