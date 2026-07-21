@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS banner_config (
 );
 
 -- 2. TRIGGER updated_at
-CREATE TRIGGER IF NOT EXISTS set_updated_at BEFORE UPDATE ON banner_config
+DROP TRIGGER IF EXISTS set_updated_at ON banner_config;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON banner_config
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- 3. SEED: Insertar config por defecto (solo si no existe)

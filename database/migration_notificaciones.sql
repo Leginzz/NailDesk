@@ -44,7 +44,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER IF NOT EXISTS on_perfil_notify_admin
+DROP TRIGGER IF EXISTS on_perfil_notify_admin ON perfiles_negocio;
+CREATE TRIGGER on_perfil_notify_admin
   AFTER INSERT ON perfiles_negocio
   FOR EACH ROW EXECUTE FUNCTION notify_admin_new_salon();
 
