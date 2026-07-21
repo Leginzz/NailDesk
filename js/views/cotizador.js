@@ -4,6 +4,7 @@
 
 import supabase from '../supabase.js';
 import { showToast } from '../components/toast.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 let perfil = null;
 let servicios = [];
@@ -79,7 +80,7 @@ function render() {
             <label class="form-label">Agregar servicio</label>
             <select id="cot-add-servicio" class="form-input">
               <option value="">Seleccionar servicio...</option>
-              ${servicios.map(s => `<option value="${s.id}">${s.nombre} — $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
+              ${servicios.map(s => `<option value="${s.id}">${escapeHtml(s.nombre)} — $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
             </select>
           </div>
 
@@ -93,7 +94,7 @@ function render() {
             <label class="form-label">Agregar extra</label>
             <select id="cot-add-extra" class="form-input">
               <option value="">Seleccionar extra...</option>
-              ${extras.map(e => `<option value="${e.id}">${e.nombre} — $${Number(e.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
+              ${extras.map(e => `<option value="${e.id}">${escapeHtml(e.nombre)} — $${Number(e.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
             </select>
           </div>
 
@@ -131,13 +132,13 @@ function render() {
                   <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
-                  <h4 class="font-display text-base font-bold" style="color:var(--charcoal)">${perfil?.nombre_salon || 'Mi Salón'}</h4>
+                  <h4 class="font-display text-base font-bold" style="color:var(--charcoal)">${escapeHtml(perfil?.nombre_salon) || 'Mi Salón'}</h4>
                   <p class="text-xs" style="color:var(--terracota-400)">Cotización de servicios</p>
                 </div>
               </div>
               <div class="flex justify-between items-end text-xs" style="color:var(--terracota-400)">
                 <span id="cot-preview-fecha">${new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                <span id="cot-preview-cliente" class="font-semibold" style="color:var(--charcoal)">${clienteNombre || 'Cliente'}</span>
+                <span id="cot-preview-cliente" class="font-semibold" style="color:var(--charcoal)">${escapeHtml(clienteNombre) || 'Cliente'}</span>
               </div>
             </div>
 
@@ -151,7 +152,7 @@ function render() {
               ${renderPreviewTotals()}
             </div>
 
-            ${notasCotizacion ? `<div class="mt-3 p-3 rounded-lg text-xs" style="background:var(--terracota-50); color:var(--terracota-600)"><strong>Notas:</strong> ${notasCotizacion}</div>` : ''}
+            ${notasCotizacion ? `<div class="mt-3 p-3 rounded-lg text-xs" style="background:var(--terracota-50); color:var(--terracota-600)"><strong>Notas:</strong> ${escapeHtml(notasCotizacion)}</div>` : ''}
           </div>
 
           <!-- Actions -->
@@ -187,7 +188,7 @@ function renderItemCard(item, globalIdx) {
           <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:${color}15">
             <i data-lucide="${icon}" class="w-3.5 h-3.5" style="color:${color}"></i>
           </div>
-          <span class="text-sm font-semibold" style="color:var(--charcoal)">${item.nombre}</span>
+          <span class="text-sm font-semibold" style="color:var(--charcoal)">${escapeHtml(item.nombre)}</span>
         </div>
         <button class="p-1 rounded-lg hover:bg-red-50 transition-colors cot-remove-item" data-idx="${globalIdx}">
           <i data-lucide="x" class="w-4 h-4" style="color:#dc6b4a"></i>
@@ -258,7 +259,7 @@ function renderPreviewItems() {
         ${items.map(item => `
           <tr>
             <td>
-              <span class="font-medium" style="color:var(--charcoal)">${item.nombre}</span>
+              <span class="font-medium" style="color:var(--charcoal)">${escapeHtml(item.nombre)}</span>
               <span class="text-xs ml-1" style="color:var(--terracota-300)">${item.tipo === 'servicio' ? 'Servicio' : 'Extra'}</span>
             </td>
             <td class="text-center">${item.cantidad}</td>
@@ -388,7 +389,7 @@ function bindEvents() {
         const div = document.createElement('div');
         div.className = 'cot-notes mt-3 p-3 rounded-lg text-xs';
         div.style.cssText = 'background:var(--terracota-50); color:var(--terracota-600)';
-        div.innerHTML = `<strong>Notas:</strong> ${notasCotizacion}`;
+        div.innerHTML = `<strong>Notas:</strong> ${escapeHtml(notasCotizacion)}`;
         invoice.appendChild(div);
       }
     }

@@ -5,6 +5,7 @@
 import supabase from '../../supabase.js';
 import { openModal, closeModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminSalones() {
   const content = document.getElementById('page-content');
@@ -124,13 +125,13 @@ function renderSalonRow(salon) {
             <i data-lucide="building-2" class="w-4 h-4 text-terracota-600"></i>
           </div>
           <div>
-            <p class="font-medium text-gray-900">${salon.nombre_salon || 'Sin nombre'}</p>
+            <p class="font-medium text-gray-900">${escapeHtml(salon.nombre_salon) || 'Sin nombre'}</p>
             <p class="text-xs text-gray-400 truncate max-w-[200px]">${salon.user_id.slice(0,8)}...</p>
           </div>
         </div>
       </td>
       <td class="px-4 py-3">
-        <span class="text-sm text-gray-600">${plan?.nombre || 'Sin plan'}</span>
+        <span class="text-sm text-gray-600">${escapeHtml(plan?.nombre) || 'Sin plan'}</span>
         ${plan?.precio_mensual > 0 ? `<span class="text-xs text-gray-400 ml-1">$${plan.precio_mensual}/mes</span>` : ''}
       </td>
       <td class="px-4 py-3">
@@ -194,8 +195,8 @@ async function promptChangePlan(userId) {
         <button data-plan-id="${p.id}" class="change-plan-btn w-full text-left p-4 rounded-xl border-2 transition-all ${current?.plan_id === p.id ? 'border-terracota-500 bg-terracota-50' : 'border-gray-200 hover:border-gray-300'}">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-semibold text-gray-900">${p.nombre}</p>
-              <p class="text-sm text-gray-500">${p.descripcion || ''}</p>
+              <p class="font-semibold text-gray-900">${escapeHtml(p.nombre)}</p>
+              <p class="text-sm text-gray-500">${escapeHtml(p.descripcion) || ''}</p>
             </div>
             <p class="font-bold text-terracota-600">${p.precio_mensual > 0 ? '$' + p.precio_mensual + '/mes' : 'Gratis'}</p>
           </div>
@@ -249,7 +250,7 @@ async function showSalonDetails(userId) {
           <p class="text-xs text-gray-500 mt-1">Insumos</p>
         </div>
         <div class="bg-gray-50 rounded-xl p-4 text-center">
-          <p class="text-2xl font-bold text-terracota-600">${sub?.plan?.nombre || 'N/A'}</p>
+          <p class="text-2xl font-bold text-terracota-600">${escapeHtml(sub?.plan?.nombre) || 'N/A'}</p>
           <p class="text-xs text-gray-500 mt-1">Plan actual</p>
         </div>
       </div>
@@ -258,7 +259,7 @@ async function showSalonDetails(userId) {
         <p><span class="font-medium text-gray-700">Registro:</span> ${perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX') : 'N/A'}</p>
       </div>
     </div>
-  `, { title: perfil?.nombre_salon || 'Detalle del Salon' });
+  `, { title: escapeHtml(perfil?.nombre_salon) || 'Detalle del Salon' });
 }
 
 

@@ -66,7 +66,7 @@ function openExtraModal(extra = null, user = null) {
   const isEdit = !!extra;
   openModal(`
     <form id="extra-form" class="space-y-4">
-      <div><label class="form-label">Nombre</label><input type="text" id="ex-nombre" class="form-input" value="${extra?.nombre || ''}" required placeholder="Ej: Diseño por uña"></div>
+      <div><label class="form-label">Nombre</label><input type="text" id="ex-nombre" class="form-input" value="${escapeHtml(extra?.nombre) || ''}" required placeholder="Ej: Diseño por uña"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="form-label">Costo aprox</label><input type="number" step="0.01" id="ex-costo" class="form-input" value="${extra?.costo_aprox || 0}" required></div>
         <div><label class="form-label">% Ganancia</label><input type="number" id="ex-ganancia" class="form-input" value="${extra?.porcentaje_ganancia || 50}" required></div>

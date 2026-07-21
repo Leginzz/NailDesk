@@ -4,6 +4,7 @@
 
 import supabase from '../supabase.js';
 import { renderUpgradeBanner } from '../components/upgrade-banner.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 let chartInstance = null;
 
@@ -42,7 +43,7 @@ export async function renderDashboard() {
       <div class="relative z-10">
         <p class="text-white/60 text-sm mb-1">${fechaLarga} · ${hora}</p>
         <h2 class="font-display text-2xl font-bold mb-2">Buenas ${now.getHours() < 12 ? 'días' : now.getHours() < 19 ? 'tardes' : 'noches'} ✨</h2>
-        <p class="text-white/70 text-sm max-w-md">Resumen de <strong class="text-white">${perfil?.nombre_salon || 'tu salón'}</strong> — ${perfil?.total_servicios || 0} servicios activos, ${perfil?.total_insumos || 0} insumos en catálogo.</p>
+        <p class="text-white/70 text-sm max-w-md">Resumen de <strong class="text-white">${escapeHtml(perfil?.nombre_salon) || 'tu salón'}</strong> — ${perfil?.total_servicios || 0} servicios activos, ${perfil?.total_insumos || 0} insumos en catálogo.</p>
       </div>
     </div>
 
@@ -114,7 +115,7 @@ export async function renderDashboard() {
           ${servicios?.slice(0, 6).map(s => `
             <div class="flex items-center justify-between py-2 px-3 rounded-lg" style="background:var(--sand-50)">
               <div>
-                <p class="text-sm font-medium" style="color:var(--charcoal)">${s.nombre}</p>
+                <p class="text-sm font-medium" style="color:var(--charcoal)">${escapeHtml(s.nombre)}</p>
                 <p class="text-[11px]" style="color:var(--terracota-300)">${s.tiempo_horas}h</p>
               </div>
               <span class="text-sm font-bold" style="color:var(--terracota-500)">$${Number(s.precio_redondeado).toLocaleString('es-MX')}</span>
@@ -134,7 +135,7 @@ export async function renderDashboard() {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         ${insumos.filter(i => i.stock_actual <= 3).slice(0, 6).map(i => `
           <div class="flex items-center justify-between py-2 px-3 rounded-lg border" style="border-color:var(--terracota-100); background:var(--sand-50)">
-            <span class="text-sm" style="color:var(--charcoal)">${i.producto}</span>
+            <span class="text-sm" style="color:var(--charcoal)">${escapeHtml(i.producto)}</span>
             <span class="badge ${i.stock_actual === 0 ? 'badge-danger' : 'badge-warning'}">${i.stock_actual} usos</span>
           </div>
         `).join('') || '<p class="text-sm col-span-full text-center py-2" style="color:var(--olive-500)">Todo con buen stock ✓</p>'}

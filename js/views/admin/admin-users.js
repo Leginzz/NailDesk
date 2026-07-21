@@ -4,6 +4,7 @@
 
 import supabase from '../../supabase.js';
 import { showToast } from '../../components/toast.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminUsers() {
   const container = document.getElementById('page-content');
@@ -73,14 +74,14 @@ export async function renderAdminUsers() {
           <tbody>
             ${users.map(u => `
               <tr>
-                <td class="font-semibold" style="color:var(--charcoal)">${u.salon}</td>
+                <td class="font-semibold" style="color:var(--charcoal)">${escapeHtml(u.salon)}</td>
                 <td class="text-xs font-mono" style="color:var(--terracota-400)">${u.user_id.substring(0, 12)}...</td>
                 <td>
                   <span class="badge ${u.role === 'admin' ? 'badge-success' : 'badge-info'}">
                     ${u.role === 'admin' ? 'Admin' : 'Usuario'}
                   </span>
                 </td>
-                <td><span class="badge badge-warning">${u.plan}</span></td>
+                <td><span class="badge badge-warning">${escapeHtml(u.plan)}</span></td>
                 <td>
                   <span class="badge ${u.subscription_status === 'activo' ? 'badge-success' : u.subscription_status === 'trial' ? 'badge-info' : 'badge-danger'}">
                     ${u.subscription_status}

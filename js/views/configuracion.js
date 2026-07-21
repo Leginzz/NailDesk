@@ -4,6 +4,7 @@
 
 import supabase from '../supabase.js';
 import { showToast } from '../components/toast.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -42,12 +43,12 @@ export async function renderConfiguracion() {
       <div class="config-section">
         <h3><i data-lucide="store" class="w-4 h-4"></i> Datos del Salón</h3>
         <div class="space-y-4">
-          <div><label class="form-label">Nombre del salón</label><input type="text" id="cfg-nombre" class="form-input" value="${perfil?.nombre_salon || ''}" required></div>
+          <div><label class="form-label">Nombre del salón</label><input type="text" id="cfg-nombre" class="form-input" value="${escapeHtml(perfil?.nombre_salon) || ''}" required></div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="form-label">Teléfono</label><input type="text" id="cfg-telefono" class="form-input" value="${perfil?.telefono || ''}" placeholder="Opcional"></div>
-            <div><label class="form-label">Email</label><input type="email" id="cfg-email" class="form-input" value="${perfil?.email_contacto || ''}" placeholder="Opcional"></div>
+            <div><label class="form-label">Teléfono</label><input type="text" id="cfg-telefono" class="form-input" value="${escapeHtml(perfil?.telefono) || ''}" placeholder="Opcional"></div>
+            <div><label class="form-label">Email</label><input type="email" id="cfg-email" class="form-input" value="${escapeHtml(perfil?.email_contacto) || ''}" placeholder="Opcional"></div>
           </div>
-          <div><label class="form-label">Dirección</label><input type="text" id="cfg-direccion" class="form-input" value="${perfil?.direccion || ''}" placeholder="Opcional"></div>
+          <div><label class="form-label">Dirección</label><input type="text" id="cfg-direccion" class="form-input" value="${escapeHtml(perfil?.direccion) || ''}" placeholder="Opcional"></div>
         </div>
       </div>
 

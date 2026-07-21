@@ -6,6 +6,7 @@ import supabase from '../supabase.js';
 import { openModal, closeModal } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
 import { exportWithHeaders } from '../utils/export-excel.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 let insumosCatalog = [];
 let perfilData = null;
@@ -72,8 +73,8 @@ export async function renderServicios() {
               <tr>
                 <td>
                   <div>
-                    <p class="font-semibold" style="color:var(--charcoal)">${s.nombre}</p>
-                    ${s.descripcion ? `<p class="text-xs" style="color:var(--terracota-300)">${s.descripcion}</p>` : ''}
+                    <p class="font-semibold" style="color:var(--charcoal)">${escapeHtml(s.nombre)}</p>
+                    ${s.descripcion ? `<p class="text-xs" style="color:var(--terracota-300)">${escapeHtml(s.descripcion)}</p>` : ''}
                   </div>
                 </td>
                 <td>
@@ -166,7 +167,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
       <form id="servicio-form" class="space-y-4">
         <div>
           <label class="form-label">Nombre del servicio</label>
-          <input type="text" id="s-nombre" class="form-input" value="${servicio?.nombre || ''}" required placeholder="Ej: Uñas acrílicas">
+          <input type="text" id="s-nombre" class="form-input" value="${escapeHtml(servicio?.nombre) || ''}" required placeholder="Ej: Uñas acrílicas">
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div>
@@ -200,7 +201,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
           <div class="flex gap-2">
             <select id="s-add-insumo" class="form-input flex-1 text-xs" style="padding:0.5rem 0.625rem">
               <option value="">Agregar insumo...</option>
-              ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
+              ${getAvailableInsumos().map(i => `<option value="${i.id}">${escapeHtml(i.producto)} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
             </select>
             <button type="button" class="btn btn-secondary text-xs" id="s-btn-add-insumo" style="padding:0.5rem 0.75rem">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
@@ -234,7 +235,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
 
         <div>
           <label class="form-label">Descripción</label>
-          <textarea id="s-desc" class="form-input" rows="2" placeholder="Opcional">${servicio?.descripcion || ''}</textarea>
+          <textarea id="s-desc" class="form-input" rows="2" placeholder="Opcional">${escapeHtml(servicio?.descripcion) || ''}</textarea>
         </div>
 
         <div class="flex gap-3 pt-2">
@@ -252,7 +253,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
     return modalInsumos.map((mi, i) => `
       <div class="s-insumo-row flex items-center gap-2 p-2 rounded-lg" style="background:white; border:1px solid var(--terracota-100)">
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold truncate" style="color:var(--charcoal)">${mi.nombre}</p>
+          <p class="text-xs font-semibold truncate" style="color:var(--charcoal)">${escapeHtml(mi.nombre)}</p>
           <p class="text-xs" style="color:var(--terracota-300)">$${mi.costo_por_uso.toFixed(2)}/uso</p>
         </div>
         <div class="flex items-center gap-1">
@@ -285,7 +286,7 @@ function openServicioModal(servicio = null, insumosAsignados = []) {
     if (select) {
       select.innerHTML = `
         <option value="">Agregar insumo...</option>
-        ${getAvailableInsumos().map(i => `<option value="${i.id}">${i.producto} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
+        ${getAvailableInsumos().map(i => `<option value="${i.id}">${escapeHtml(i.producto)} — $${Number(i.costo_por_uso).toFixed(2)}/uso</option>`).join('')}
       `;
     }
     if (window.lucide) lucide.createIcons();

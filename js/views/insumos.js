@@ -98,8 +98,8 @@ function openInsumoModal(item = null, user = null) {
   const isEdit = !!item;
   openModal(`
     <form id="insumo-form" class="space-y-4">
-      <div><label class="form-label">Producto</label><input type="text" id="i-producto" class="form-input" value="${item?.producto || ''}" required placeholder="Ej: Polvo acrílico"></div>
-      <div><label class="form-label">Presentación</label><input type="text" id="i-presentacion" class="form-input" value="${item?.presentacion || ''}" placeholder="Ej: 450 g"></div>
+      <div><label class="form-label">Producto</label><input type="text" id="i-producto" class="form-input" value="${escapeHtml(item?.producto) || ''}" required placeholder="Ej: Polvo acrílico"></div>
+      <div><label class="form-label">Presentación</label><input type="text" id="i-presentacion" class="form-input" value="${escapeHtml(item?.presentacion) || ''}" placeholder="Ej: 450 g"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="form-label">Costo de compra</label><input type="number" step="0.01" id="i-costo" class="form-input" value="${item?.costo_compra || 0}" required></div>
         <div><label class="form-label">Rendimiento (usos)</label><input type="number" id="i-rendimiento" class="form-input" value="${item?.rendimiento || 1}" required></div>

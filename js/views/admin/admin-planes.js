@@ -3,6 +3,7 @@
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminPlanes() {
   const content = document.getElementById('page-content');
@@ -46,7 +47,7 @@ export async function renderAdminPlanes() {
         <div class="flex flex-wrap gap-2">
           ${modulos.map(m => `
             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-xs text-gray-600">
-              <i data-lucide="${m.icono}" class="w-3 h-3"></i>${m.nombre}
+              <i data-lucide="${m.icono}" class="w-3 h-3"></i>${escapeHtml(m.nombre)}
             </span>
           `).join('')}
         </div>
@@ -92,14 +93,14 @@ function renderPlanCard(plan, modulos, includedModulos) {
     <div class="bg-white rounded-2xl border-2 ${isFree ? 'border-gray-200' : 'border-terracota-200'} overflow-hidden">
       <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-          <h4 class="font-display text-xl font-bold text-gray-900">${plan.nombre}</h4>
+          <h4 class="font-display text-xl font-bold text-gray-900">${escapeHtml(plan.nombre)}</h4>
           <button data-action="edit-plan" data-plan-id="${plan.id}" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600">
             <i data-lucide="pencil" class="w-4 h-4"></i>
           </button>
         </div>
         <p class="text-3xl font-bold text-terracota-600 mb-1">${isFree ? 'Gratis' : '$' + plan.precio_mensual}<span class="text-sm font-normal text-gray-400">/mes</span></p>
-        <p class="text-sm text-gray-500 mb-4">${plan.descripcion || 'Sin descripción'}</p>
-        <div class="text-xs text-gray-400 mb-4">Slug: <code class="bg-gray-100 px-1 rounded">${plan.slug}</code></div>
+        <p class="text-sm text-gray-500 mb-4">${escapeHtml(plan.descripcion) || 'Sin descripción'}</p>
+        <div class="text-xs text-gray-400 mb-4">Slug: <code class="bg-gray-100 px-1 rounded">${escapeHtml(plan.slug)}</code></div>
       </div>
       <div class="border-t border-gray-100 p-4">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Módulos incluidos</p>
@@ -110,7 +111,7 @@ function renderPlanCard(plan, modulos, includedModulos) {
               <button data-action="toggle-module" data-plan-id="${plan.id}" data-modulo-id="${m.id}"
                 class="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors ${included ? 'bg-terracota-50 text-terracota-700' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}">
                 <span class="flex items-center gap-2">
-                  <i data-lucide="${m.icono}" class="w-3.5 h-3.5"></i>${m.nombre}
+                  <i data-lucide="${m.icono}" class="w-3.5 h-3.5"></i>${escapeHtml(m.nombre)}
                 </span>
                 <i data-lucide="${included ? 'check-circle' : 'circle'}" class="w-4 h-4 ${included ? 'text-terracota-500' : 'text-gray-300'}"></i>
               </button>
@@ -132,11 +133,11 @@ function openPlanModal(plan, modulos) {
       <form id="plan-form" class="space-y-4">
         <div>
           <label class="form-label">Nombre</label>
-          <input type="text" id="plan-nombre" value="${plan?.nombre || ''}" required class="form-input" placeholder="Ej: Premium">
+          <input type="text" id="plan-nombre" value="${escapeHtml(plan?.nombre) || ''}" required class="form-input" placeholder="Ej: Premium">
         </div>
         <div>
           <label class="form-label">Slug</label>
-          <input type="text" id="plan-slug" value="${plan?.slug || ''}" required class="form-input" placeholder="premium" ${!isNew ? 'readonly' : ''}>
+          <input type="text" id="plan-slug" value="${escapeHtml(plan?.slug) || ''}" required class="form-input" placeholder="premium" ${!isNew ? 'readonly' : ''}>
         </div>
         <div>
           <label class="form-label">Precio mensual ($)</label>
@@ -144,7 +145,7 @@ function openPlanModal(plan, modulos) {
         </div>
         <div>
           <label class="form-label">Descripción</label>
-          <input type="text" id="plan-descripcion" value="${plan?.descripcion || ''}" class="form-input" placeholder="Descripción del plan">
+          <input type="text" id="plan-descripcion" value="${escapeHtml(plan?.descripcion) || ''}" class="form-input" placeholder="Descripción del plan">
         </div>
         <div class="flex gap-3 pt-2">
           <button type="submit" class="btn btn-primary flex-1 justify-center text-sm">

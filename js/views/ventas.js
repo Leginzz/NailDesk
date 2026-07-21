@@ -412,13 +412,13 @@ function openVentaModal(venta = null, user = null) {
     <form id="venta-form" class="space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div><label class="form-label">Fecha</label><input type="date" id="v-fecha" class="form-input" value="${venta?.fecha || today}" required></div>
-        <div><label class="form-label">Cliente</label><input type="text" id="v-cliente" class="form-input" placeholder="Nombre" value="${venta?.cliente_nombre || ''}"></div>
+        <div><label class="form-label">Cliente</label><input type="text" id="v-cliente" class="form-input" placeholder="Nombre" value="${escapeHtml(venta?.cliente_nombre) || ''}"></div>
       </div>
       <div>
         <label class="form-label">Servicio</label>
         <select id="v-servicio" class="form-input">
           <option value="">Seleccionar...</option>
-          ${allServicios.map(s => `<option value="${s.id}" data-precio="${s.precio_redondeado}" data-costo="${s.costo_total}" ${venta?.servicio_id === s.id ? 'selected' : ''}>${s.nombre} — $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
+          ${allServicios.map(s => `<option value="${s.id}" data-precio="${s.precio_redondeado}" data-costo="${s.costo_total}" ${venta?.servicio_id === s.id ? 'selected' : ''}>${escapeHtml(s.nombre)} — $${Number(s.precio_redondeado).toLocaleString('es-MX')}</option>`).join('')}
         </select>
       </div>
       <div class="grid grid-cols-2 gap-4">
@@ -432,7 +432,7 @@ function openVentaModal(venta = null, user = null) {
           ${['Efectivo', 'Tarjeta', 'Transferencia', 'Otro'].map(m => `<option value="${m}" ${venta?.metodo_pago === m ? 'selected' : ''}>${m}</option>`).join('')}
         </select>
       </div>
-      <div><label class="form-label">Notas</label><textarea id="v-notas" class="form-input" rows="2" placeholder="Opcional">${venta?.notas || ''}</textarea></div>
+      <div><label class="form-label">Notas</label><textarea id="v-notas" class="form-input" rows="2" placeholder="Opcional">${escapeHtml(venta?.notas) || ''}</textarea></div>
       <div class="flex gap-3 pt-2">
         <button type="button" class="btn btn-secondary flex-1" onclick="document.getElementById('modal-close-btn').click()">Cancelar</button>
         <button type="submit" class="btn btn-primary flex-1">${isEdit ? 'Guardar Cambios' : 'Registrar'}</button>
@@ -482,7 +482,7 @@ function openExtrasModal(extras) {
     <div class="space-y-2">
       ${extras.map(ve => `
         <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-          <span class="text-sm text-gray-700">${ve.extra?.nombre || 'Extra'}</span>
+          <span class="text-sm text-gray-700">${escapeHtml(ve.extra?.nombre) || 'Extra'}</span>
           <span class="text-sm font-semibold text-gray-900">$${Number(ve.subtotal).toLocaleString('es-MX')} <span class="text-xs text-gray-400 font-normal">×${ve.cantidad}</span></span>
         </div>
       `).join('')}

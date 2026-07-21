@@ -75,7 +75,7 @@ function openEquipoModal(item = null, user = null) {
   const isEdit = !!item;
   openModal(`
     <form id="equipo-form" class="space-y-4">
-      <div><label class="form-label">Nombre</label><input type="text" id="e-herramienta" class="form-input" value="${item?.herramienta || ''}" required placeholder="Ej: Micromotor"></div>
+      <div><label class="form-label">Nombre</label><input type="text" id="e-herramienta" class="form-input" value="${escapeHtml(item?.herramienta) || ''}" required placeholder="Ej: Micromotor"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="form-label">Costo compra</label><input type="number" step="0.01" id="e-costo" class="form-input" value="${item?.costo_compra || 0}" required></div>
         <div><label class="form-label">Vida útil (servicios)</label><input type="number" id="e-vida" class="form-input" value="${item?.vida_util_servicios || 3000}" required></div>

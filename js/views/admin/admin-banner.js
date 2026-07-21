@@ -3,6 +3,7 @@
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminBanner() {
   const content = document.getElementById('page-content');
@@ -35,24 +36,24 @@ export async function renderAdminBanner() {
 
           <div>
             <label class="form-label">Título del banner</label>
-            <input type="text" id="banner-titulo" value="${config?.titulo || ''}" class="form-input" placeholder="Ej: Desbloquea todo tu potencial">
+            <input type="text" id="banner-titulo" value="${escapeHtml(config?.titulo) || ''}" class="form-input" placeholder="Ej: Desbloquea todo tu potencial">
           </div>
 
           <div>
             <label class="form-label">Mensaje</label>
-            <textarea id="banner-mensaje" rows="3" class="form-input" placeholder="Describe los beneficios del plan de pago...">${config?.mensaje || ''}</textarea>
+            <textarea id="banner-mensaje" rows="3" class="form-input" placeholder="Describe los beneficios del plan de pago...">${escapeHtml(config?.mensaje) || ''}</textarea>
           </div>
 
           <div>
             <label class="form-label">Texto del botón CTA</label>
-            <input type="text" id="banner-cta" value="${config?.cta_texto || ''}" class="form-input" placeholder="Ej: Mejorar a Básico — $299/mes">
+            <input type="text" id="banner-cta" value="${escapeHtml(config?.cta_texto) || ''}" class="form-input" placeholder="Ej: Mejorar a Básico — $299/mes">
           </div>
 
           <div>
             <label class="form-label">Número de WhatsApp (con código de país)</label>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">wa.me/</span>
-              <input type="text" id="banner-whatsapp" value="${config?.whatsapp_numero || ''}" class="form-input flex-1" placeholder="527831391020">
+              <input type="text" id="banner-whatsapp" value="${escapeHtml(config?.whatsapp_numero) || ''}" class="form-input flex-1" placeholder="527831391020">
             </div>
             <p class="text-xs text-gray-400 mt-1">Incluye el código de país sin +. Ej: 52 para México</p>
           </div>
@@ -67,8 +68,8 @@ export async function renderAdminBanner() {
                     <i data-lucide="lock" class="w-4 h-4"></i>
                   </div>
                   <div>
-                    <p class="font-bold text-sm" id="preview-titulo">${config?.titulo || 'Título del banner'}</p>
-                    <p class="text-xs text-white/80 mt-0.5" id="preview-mensaje">${config?.mensaje || 'Mensaje del banner'}</p>
+                    <p class="font-bold text-sm" id="preview-titulo">${escapeHtml(config?.titulo) || 'Título del banner'}</p>
+                    <p class="text-xs text-white/80 mt-0.5" id="preview-mensaje">${escapeHtml(config?.mensaje) || 'Mensaje del banner'}</p>
                   </div>
                 </div>
               </div>

@@ -5,6 +5,7 @@
 import supabase from '../../supabase.js';
 import { openModal, closeModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminSuscripciones() {
   const content = document.getElementById('page-content');
@@ -133,11 +134,11 @@ function renderSubRow(sub) {
   return `
     <tr class="sub-row border-b border-gray-50 hover:bg-gray-50/50" data-estado="${sub.estado}">
       <td class="px-4 py-3">
-        <p class="font-medium text-gray-900">${sub.perfil?.nombre_salon || 'Sin nombre'}</p>
+        <p class="font-medium text-gray-900">${escapeHtml(sub.perfil?.nombre_salon) || 'Sin nombre'}</p>
         <p class="text-xs text-gray-400">${sub.user_id.slice(0,8)}...</p>
       </td>
       <td class="px-4 py-3">
-        <span class="text-sm font-medium text-terracota-600">${sub.plan?.nombre || 'Sin plan'}</span>
+        <span class="text-sm font-medium text-terracota-600">${escapeHtml(sub.plan?.nombre) || 'Sin plan'}</span>
         ${sub.plan?.precio_mensual > 0 ? `<span class="text-xs text-gray-400"> $${sub.plan.precio_mensual}</span>` : ''}
       </td>
       <td class="px-4 py-3">
@@ -168,7 +169,7 @@ async function openEditSubModal(subId, planes) {
       <div>
         <label class="form-label">Plan</label>
         <select id="sub-plan" class="form-input">
-          ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${p.nombre} — $${p.precio_mensual}/mes</option>`).join('')}
+          ${(planes || []).map(p => `<option value="${p.id}" ${sub.plan_id === p.id ? 'selected' : ''}>${escapeHtml(p.nombre)} — $${p.precio_mensual}/mes</option>`).join('')}
         </select>
       </div>
       <div>

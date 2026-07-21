@@ -3,6 +3,7 @@
 // ============================================================
 
 import supabase from '../../supabase.js';
+import { escapeHtml } from '../../utils/escape-html.js';
 
 export async function renderAdminIngresos() {
   const content = document.getElementById('page-content');
@@ -235,7 +236,7 @@ export async function renderAdminIngresos() {
             <tbody>
               ${planStats.map(p => `
                 <tr class="border-b border-gray-50 hover:bg-gray-50/50">
-                  <td class="px-4 py-3 font-medium text-gray-900">${p.nombre}</td>
+                  <td class="px-4 py-3 font-medium text-gray-900">${escapeHtml(p.nombre)}</td>
                   <td class="px-4 py-3 text-right text-gray-600">${p.precio_mensual > 0 ? '$' + p.precio_mensual.toLocaleString('es-MX') : 'Gratis'}</td>
                   <td class="px-4 py-3 text-right text-gray-600">${p.count}</td>
                   <td class="px-4 py-3 text-right text-green-600 font-medium">${p.activeCount}</td>

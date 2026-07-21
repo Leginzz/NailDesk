@@ -89,7 +89,7 @@ function openCostoModal(costo = null, user = null) {
   const isEdit = !!costo;
   openModal(`
     <form id="costo-form" class="space-y-4">
-      <div><label class="form-label">Concepto</label><input type="text" id="c-concepto" class="form-input" value="${costo?.concepto || ''}" required placeholder="Ej: Renta del local"></div>
+      <div><label class="form-label">Concepto</label><input type="text" id="c-concepto" class="form-input" value="${escapeHtml(costo?.concepto) || ''}" required placeholder="Ej: Renta del local"></div>
       <div><label class="form-label">Costo mensual</label><input type="number" step="0.01" id="c-monto" class="form-input" value="${costo?.costo_mensual || 0}" required></div>
       <div class="flex gap-3 pt-2">
         <button type="button" class="btn btn-secondary flex-1" onclick="document.getElementById('modal-close-btn').click()">Cancelar</button>
