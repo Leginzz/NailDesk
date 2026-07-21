@@ -58,7 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_cotizacion_items_user ON cotizacion_items(user_id
 CREATE INDEX IF NOT EXISTS idx_cotizacion_items_cotizacion ON cotizacion_items(cotizacion_id);
 
 -- Trigger updated_at
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON cotizaciones
+CREATE TRIGGER IF NOT EXISTS set_updated_at BEFORE UPDATE ON cotizaciones
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 COMMENT ON TABLE cotizaciones IS 'Cotizaciones generadas por el cotizador';
