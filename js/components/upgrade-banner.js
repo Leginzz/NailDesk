@@ -6,6 +6,7 @@
 
 import supabase from '../supabase.js';
 import AppState from '../services/app-state.js';
+import { escapeHtml } from '../utils/escape-html.js';
 
 const DISMISS_KEY = 'naildesk_banner_dismissed';
 const DISMISS_INTERVAL = 48 * 60 * 60 * 1000; // 48 hours
@@ -52,13 +53,13 @@ export async function renderUpgradeBanner(container) {
           <i data-lucide="lock" class="w-5 h-5"></i>
         </div>
         <div class="flex-1">
-          <h3 class="font-display text-lg font-bold">${config.titulo}</h3>
-          <p class="text-sm text-white/80 mt-1">${config.mensaje}</p>
+          <h3 class="font-display text-lg font-bold">${escapeHtml(config.titulo)}</h3>
+          <p class="text-sm text-white/80 mt-1">${escapeHtml(config.mensaje)}</p>
         </div>
         <div class="flex gap-2 flex-shrink-0">
-          <a href="${whatsappUrl}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white text-terracota-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors">
+          <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-white text-terracota-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors">
             <i data-lucide="message-circle" class="w-4 h-4"></i>
-            ${config.cta_texto}
+            ${escapeHtml(config.cta_texto)}
           </a>
         </div>
       </div>

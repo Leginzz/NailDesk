@@ -2,3 +2,4 @@ Costeo_y_Precios_Unas.xlsx
 node_modules/
 .DS_Store
 Thumbs.db
+.gstack/

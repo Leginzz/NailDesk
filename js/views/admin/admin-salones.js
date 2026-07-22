@@ -28,7 +28,7 @@ export async function renderAdminSalones() {
   }));
 
   if (perfilesRes.error || subsRes.error) {
-    content.innerHTML = `<div class="p-8 text-center text-red-500">Error al cargar salones: ${(perfilesRes.error || subsRes.error)?.message}</div>`;
+    content.innerHTML = `<div class="p-8 text-center text-red-500">Error al cargar salones: ${escapeHtml((perfilesRes.error || subsRes.error)?.message)}</div>`;
     return;
   }
 

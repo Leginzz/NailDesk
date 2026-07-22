@@ -76,10 +76,8 @@ registerForm.addEventListener('submit', async (e) => {
 
   try {
     const { data, error } = await supabase.auth.signUp({ email, password });
-    console.log('signUp response:', { data, error });
 
     if (error) {
-      console.error('signUp error:', error);
       const msg = error.message || error.msg || String(error);
       if (msg === 'User already registered') showError('Este correo ya esta registrado');
       else if (msg === 'Unable to validate email address: invalid format') showError('Correo electronico invalido');
@@ -91,15 +89,12 @@ registerForm.addEventListener('submit', async (e) => {
     }
 
     if (data.user) {
-      console.log('User created:', data.user.id);
       const { data: profileData, error: profileErr } = await supabase.from('perfiles_negocio').insert({
         user_id: data.user.id,
         nombre_salon: salon,
       }).select();
-      console.log('profile insert:', { profileData, profileErr });
 
       if (profileErr) {
-        console.error('Profile error:', profileErr);
         showError('Cuenta creada pero error al crear perfil: ' + (profileErr.message || String(profileErr)));
         btn.disabled = false;
         btn.textContent = 'Crear Cuenta';
@@ -121,7 +116,6 @@ registerForm.addEventListener('submit', async (e) => {
       btn.textContent = 'Crear Cuenta';
     }
   } catch (err) {
-    console.error('Unexpected error:', err);
     showError('Error inesperado: ' + (err.message || String(err)));
     btn.disabled = false;
     btn.textContent = 'Crear Cuenta';
