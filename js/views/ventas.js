@@ -111,7 +111,23 @@ function getTopServicios(ventas, limit = 5) {
 
 export async function renderVentas() {
   const container = document.getElementById('page-content');
-  container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
+  container.innerHTML = `
+    <div class="space-y-6 animate-in">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="skeleton skeleton-card stagger-1 animate-in"></div>
+        <div class="skeleton skeleton-card stagger-2 animate-in"></div>
+        <div class="skeleton skeleton-card stagger-3 animate-in"></div>
+        <div class="skeleton skeleton-card stagger-4 animate-in"></div>
+        <div class="skeleton skeleton-card stagger-5 animate-in"></div>
+      </div>
+      <div class="skeleton skeleton-card" style="height:48px"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="skeleton skeleton-card" style="height:280px"></div>
+        <div class="skeleton skeleton-card" style="height:280px"></div>
+      </div>
+      <div class="skeleton skeleton-card" style="height:320px"></div>
+    </div>
+  `;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -142,35 +158,35 @@ export async function renderVentas() {
 
       <!-- KPIs -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <div class="card-elevated p-4">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center"><i data-lucide="hash" class="w-4 h-4 text-gray-500"></i></div>
             <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Ventas</span>
           </div>
           <p class="text-2xl font-bold text-gray-900">${kpis.total}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <div class="card-elevated p-4">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center"><i data-lucide="dollar-sign" class="w-4 h-4 text-green-600"></i></div>
             <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Ingresos</span>
           </div>
           <p class="text-2xl font-bold text-green-700">$${kpis.ingresos.toLocaleString('es-MX')}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <div class="card-elevated p-4">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4 text-purple-600"></i></div>
             <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Ganancia</span>
           </div>
           <p class="text-2xl font-bold ${kpis.ganancia >= 0 ? 'text-green-700' : 'text-red-600'}">$${kpis.ganancia.toLocaleString('es-MX')}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <div class="card-elevated p-4">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="receipt" class="w-4 h-4 text-blue-600"></i></div>
             <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Ticket Prom.</span>
           </div>
           <p class="text-2xl font-bold text-gray-900">$${kpis.ticket.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
         </div>
-        <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <div class="card-elevated p-4">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><i data-lucide="percent" class="w-4 h-4 text-amber-600"></i></div>
             <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Margen</span>
@@ -180,7 +196,7 @@ export async function renderVentas() {
       </div>
 
       <!-- Filtros -->
-      <div class="bg-white rounded-xl p-4 border border-gray-100">
+      <div class="card-elevated p-4">
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
             ${PERIODOS.map(p => `
@@ -205,11 +221,11 @@ export async function renderVentas() {
 
       <!-- Gráficas -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl border border-gray-100 p-5">
+        <div class="card-elevated p-5">
           <h4 class="font-semibold text-gray-900 mb-4">Ingresos por Período</h4>
           <div style="height:250px"><canvas id="chart-ventas-periodo"></canvas></div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-5">
+        <div class="card-elevated p-5">
           <h4 class="font-semibold text-gray-900 mb-4">Top 5 Servicios</h4>
           <div style="height:250px"><canvas id="chart-top-servicios"></canvas></div>
         </div>
@@ -225,7 +241,7 @@ export async function renderVentas() {
       </div>
 
       <!-- Tabla -->
-      <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div class="card-elevated overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
@@ -261,9 +277,14 @@ export async function renderVentas() {
                   </td>
                 </tr>`;
               }).join('') || `
-                <tr><td colspan="8" class="text-center py-12 text-gray-400">
-                  <i data-lucide="shopping-cart" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
-                  <p class="font-medium">No hay ventas para los filtros seleccionados</p>
+                <tr><td colspan="8" class="text-center py-16">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                    </div>
+                    <h3>No hay ventas para los filtros seleccionados</h3>
+                    <p>Ajusta los filtros o registra una nueva venta.</p>
+                  </div>
                 </td></tr>
               `}
             </tbody>

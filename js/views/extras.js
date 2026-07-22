@@ -9,7 +9,14 @@ import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderExtras() {
   const container = document.getElementById('page-content');
-  container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
+  container.innerHTML = `
+    <div class="skeleton skeleton-card" style="height:48px;margin-bottom:1.5rem"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="skeleton skeleton-card stagger-1 animate-in"></div>
+      <div class="skeleton skeleton-card stagger-2 animate-in"></div>
+      <div class="skeleton skeleton-card stagger-3 animate-in"></div>
+    </div>
+  `;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -24,7 +31,7 @@ export async function renderExtras() {
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-in-delay-1">
       ${extras?.map(ex => `
-        <div class="card p-5 group">
+        <div class="card-elevated p-5 group">
           <div class="flex items-start justify-between mb-3">
             <h3 class="font-semibold" style="color:var(--charcoal)">${escapeHtml(ex.nombre)}</h3>
             <span class="badge ${ex.activo ? 'badge-success' : 'badge-danger'}">${ex.activo ? 'Activo' : 'Inactivo'}</span>
@@ -40,7 +47,13 @@ export async function renderExtras() {
           </div>
         </div>
       `).join('') || `
-        <div class="col-span-full empty-state"><i data-lucide="plus-circle" class="w-12 h-12 mx-auto mb-3"></i><p class="font-medium" style="color:var(--terracota-400)">No hay extras</p></div>
+        <div class="col-span-full empty-state">
+          <div class="empty-state-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </div>
+          <h3>No hay extras</h3>
+          <p>Agrega extras para ofrecer servicios adicionales a tus clientes.</p>
+        </div>
       `}
     </div>
   `;

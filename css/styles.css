@@ -1,5 +1,5 @@
 /* ============================================================
-   NailDesk — Minimalismo Nude Theme
+   NailDesk — Soft UI Evolution Theme
    ============================================================ */
 
 :root {
@@ -32,10 +32,18 @@
   --border: #E5E7EB;
   --border-light: #F0F0F2;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(26,26,26,0.04), 0 0 0 1px rgba(201,148,161,0.03);
-  --shadow-md: 0 4px 12px rgba(26,26,26,0.06);
-  --shadow-lg: 0 8px 24px rgba(26,26,26,0.08);
+  /* Shadows — Soft UI Evolution: multi-layer, softer */
+  --shadow-sm: 0 1px 2px rgba(26,26,26,0.04), 0 1px 4px rgba(201,148,161,0.06), 0 0 0 1px rgba(201,148,161,0.03);
+  --shadow-md: 0 2px 4px rgba(26,26,26,0.03), 0 4px 12px rgba(201,148,161,0.08), 0 1px 2px rgba(26,26,26,0.04);
+  --shadow-lg: 0 4px 8px rgba(26,26,26,0.04), 0 8px 24px rgba(201,148,161,0.10), 0 2px 4px rgba(26,26,26,0.03);
+  --shadow-xl: 0 8px 16px rgba(26,26,26,0.05), 0 16px 48px rgba(201,148,161,0.12), 0 4px 8px rgba(26,26,26,0.04);
+
+  /* Transitions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 
   /* Legacy aliases — used by stat cards, badges, tables */
   --terracota-50: #F8F8FA;
@@ -63,7 +71,20 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
 
-body { background: var(--bg); color: var(--text); }
+body { background: var(--bg); color: var(--text); position: relative; }
+
+/* --- Grain Texture Overlay --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
 
 /* --- Auth Split Layout --- */
 .auth-split { display: flex; min-height: 100vh; }
@@ -489,4 +510,268 @@ body { background: var(--bg); color: var(--text); }
 /* --- Preview Totals --- */
 .cot-preview-totals {
   display: flex; flex-direction: column; gap: 0.375rem;
+}
+
+/* ============================================================
+   Soft UI Evolution — Phase 1 Additions
+   ============================================================ */
+
+/* --- Skeleton Loading --- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--border-light);
+  border-radius: 0.5rem;
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+.skeleton * { visibility: hidden !important; }
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.6) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-text {
+  height: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+.skeleton-text.w-full { width: 100%; }
+.skeleton-text.w-3\/4 { width: 75%; }
+.skeleton-text.w-1\/2 { width: 50%; }
+.skeleton-text.w-1\/4 { width: 25%; }
+.skeleton-circle {
+  border-radius: 50%;
+}
+.skeleton-card {
+  height: 120px;
+  border-radius: 1rem;
+}
+
+/* --- Page Transition --- */
+#page-content {
+  animation: pageIn 0.35s var(--ease-smooth) both;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Card Variants --- */
+.card-glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+.card-elevated {
+  background: var(--card);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  transition: box-shadow var(--duration-normal) var(--ease-smooth),
+              transform var(--duration-normal) var(--ease-smooth);
+}
+.card-elevated:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+.card-flat {
+  background: var(--card-alt);
+  border-radius: 1rem;
+  border: 1px solid var(--border-light);
+  box-shadow: none;
+}
+.card-flat:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Empty States --- */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+  animation: fadeInUp 0.4s var(--ease-smooth) both;
+}
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: var(--rose-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+.empty-state-icon svg {
+  width: 36px;
+  height: 36px;
+  stroke: var(--rose-deep);
+  stroke-width: 1.5;
+}
+.empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.empty-state p {
+  font-size: 0.875rem;
+  max-width: 320px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+/* --- Staggered Animations --- */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+
+/* --- Focus States (WCAG AA+) --- */
+.btn:focus-visible,
+.form-input:focus-visible,
+.nav-item:focus-visible,
+.toggle:focus-visible,
+.cotizador-tab:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+.form-input:focus-visible {
+  border-color: var(--rose-deep);
+  box-shadow: 0 0 0 3px rgba(160,96,122,0.18);
+}
+
+/* --- Improved Form Labels --- */
+.form-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.375rem;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+.form-group:focus-within .form-label {
+  color: var(--rose-deep);
+}
+
+/* --- Table Row Hover Gradient --- */
+.data-table tbody tr {
+  transition: background var(--duration-fast) var(--ease-smooth);
+}
+.data-table tbody tr:hover td {
+  background: linear-gradient(90deg, var(--rose-pale), rgba(240,221,226,0.3));
+}
+
+/* --- Stat Card Enhanced --- */
+.stat-card {
+  position: relative;
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* --- Quick Action Buttons --- */
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  text-decoration: none;
+  color: var(--text);
+}
+.quick-action:hover {
+  background: var(--rose-pale);
+  border-color: var(--rose-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.quick-action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--rose-pale), var(--card));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-normal) var(--ease-smooth);
+}
+.quick-action:hover .quick-action-icon {
+  transform: scale(1.08);
+}
+.quick-action-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--rose-deep);
+  stroke-width: 2;
+}
+.quick-action span {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* --- Trend Indicator --- */
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+.trend-up {
+  background: rgba(139,168,136,0.15);
+  color: var(--olive-600);
+}
+.trend-down {
+  background: rgba(220,38,38,0.1);
+  color: #DC2626;
+}
+.trend-neutral {
+  background: var(--border-light);
+  color: var(--text-muted);
+}
+
+/* --- Config Section Enhanced --- */
+.config-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow var(--duration-normal) var(--ease-smooth);
+}
+.config-section:hover {
+  box-shadow: var(--shadow-sm);
 }

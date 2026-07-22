@@ -14,7 +14,10 @@ let costoFijoPorHora = 0;
 
 export async function renderServicios() {
   const container = document.getElementById('page-content');
-  container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
+  container.innerHTML = `
+    <div class="skeleton skeleton-card" style="height:48px;margin-bottom:1.5rem"></div>
+    <div class="skeleton skeleton-card" style="height:320px"></div>
+  `;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -53,7 +56,7 @@ export async function renderServicios() {
       </button>
     </div>
 
-    <div class="card overflow-hidden animate-in-delay-1">
+    <div class="card-elevated overflow-hidden animate-in stagger-1">
       <div class="overflow-x-auto">
         <table class="data-table">
           <thead>
@@ -95,11 +98,13 @@ export async function renderServicios() {
                 </td>
               </tr>
             `).join('') || `
-              <tr><td colspan="8" class="text-center py-12">
+              <tr><td colspan="8" class="text-center py-16">
                 <div class="empty-state">
-                  <i data-lucide="scissors" class="w-12 h-12 mx-auto mb-3"></i>
-                  <p class="font-medium" style="color:var(--terracota-400)">No hay servicios</p>
-                  <p class="text-xs mt-1" style="color:var(--terracota-300)">Crea tu primer servicio para comenzar</p>
+                  <div class="empty-state-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>
+                  </div>
+                  <h3>No hay servicios</h3>
+                  <p>Crea tu primer servicio para comenzar a calcular costos y precios.</p>
                 </div>
               </td></tr>
             `}

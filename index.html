@@ -132,8 +132,8 @@
     <aside id="sidebar" class="sidebar w-64 text-white flex-shrink-0 flex flex-col shadow-2xl" style="z-index: 100">
       <div class="relative z-10">
         <div class="p-5 border-b border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-terracota-500/20">
+          <div class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-terracota-500/20 transition-transform duration-300 group-hover:scale-105">
               <img src="Logo ND.png" alt="NailDesk" class="w-full h-full object-cover">
             </div>
             <div>
@@ -142,12 +142,20 @@
             </div>
           </div>
         </div>
-        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-180px)]" id="sidebar-nav"></nav>
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-220px)]" id="sidebar-nav"></nav>
       </div>
       <div class="relative z-10 p-3 border-t border-white/10 mt-auto">
+        <!-- Plan Badge -->
+        <div class="mb-2 px-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" style="background:rgba(201,148,161,0.2); color:rgba(255,255,255,0.7)" id="sidebar-plan-badge">
+            <span class="w-1.5 h-1.5 rounded-full bg-olive-500"></span>
+            Free
+          </span>
+        </div>
+        <!-- User -->
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-terracota-500/20 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="user" class="w-4 h-4 text-terracota-300"></i>
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold" style="background:linear-gradient(135deg, var(--rose), var(--rose-deep)); color:white" id="sidebar-user-avatar">
+            U
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-xs font-medium truncate text-white/70" id="sidebar-user-email">usuario@email.com</p>
@@ -166,7 +174,11 @@
           <button id="btn-toggle-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-terracota-50 transition-colors">
             <i data-lucide="menu" class="w-5 h-5 text-terracota-600"></i>
           </button>
-          <h1 id="page-title" class="text-lg font-semibold" style="color:var(--charcoal)">Dashboard</h1>
+          <div class="flex items-center gap-2 text-sm">
+            <span style="color:var(--text-muted)">NailDesk</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="page-title" class="font-semibold" style="color:var(--charcoal)">Dashboard</span>
+          </div>
         </div>
         <div class="flex items-center gap-3">
           <!-- Notifications Bell (admin) -->

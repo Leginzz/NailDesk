@@ -3,7 +3,7 @@
 // ============================================================
 
 import { initAuth } from './auth.js';
-import { renderSidebar, updateSalonName, updateUserEmail } from './components/sidebar.js';
+import { renderSidebar, updateSalonName, updateUserEmail, updatePlanBadge } from './components/sidebar.js';
 import { initNotifications, loadNotifications } from './components/notifications.js';
 import AppState from './services/app-state.js';
 import supabase from './supabase.js';
@@ -116,6 +116,7 @@ window.addEventListener('auth:ready', async (e) => {
 
   // Load app state (role, subscription, modules)
   await AppState.load(user.id);
+  updatePlanBadge(AppState.plan || 'free');
 
   // Show/hide notifications bell for admin
   const notifWrapper = document.getElementById('notifications-wrapper');

@@ -68,6 +68,20 @@ export function updateSalonName(name) {
 export function updateUserEmail(email) {
   const el = document.getElementById('sidebar-user-email');
   if (el) el.textContent = email || '';
+  const avatar = document.getElementById('sidebar-user-avatar');
+  if (avatar && email) avatar.textContent = email.charAt(0).toUpperCase();
+}
+
+export function updatePlanBadge(plan) {
+  const badge = document.getElementById('sidebar-plan-badge');
+  if (!badge) return;
+  const planName = (plan?.nombre || 'Free').toLowerCase();
+  const labels = { free: 'Free', 'básico': 'Básico', basico: 'Básico', premium: 'Premium' };
+  const colors = { free: 'rgba(201,148,161,0.2)', 'básico': 'rgba(139,168,136,0.2)', basico: 'rgba(139,168,136,0.2)', premium: 'rgba(160,96,122,0.3)' };
+  const dotColors = { free: 'var(--olive-500)', 'básico': 'var(--olive-500)', basico: 'var(--olive-500)', premium: 'var(--rose)' };
+  const key = planName || 'free';
+  badge.style.background = colors[key] || colors.free;
+  badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${dotColors[key] || dotColors.free}"></span> ${labels[key] || labels.free}`;
 }
 
 // Mobile toggle

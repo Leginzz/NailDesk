@@ -10,7 +10,10 @@ import { escapeHtml } from '../utils/escape-html.js';
 
 export async function renderInsumos() {
   const container = document.getElementById('page-content');
-  container.innerHTML = `<div class="flex items-center justify-center py-20"><div class="spinner"></div></div>`;
+  container.innerHTML = `
+    <div class="skeleton skeleton-card" style="height:48px;margin-bottom:1.5rem"></div>
+    <div class="skeleton skeleton-card" style="height:320px"></div>
+  `;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -29,7 +32,7 @@ export async function renderInsumos() {
       </button>
     </div>
 
-    <div class="card overflow-hidden animate-in-delay-1">
+    <div class="card-elevated overflow-hidden animate-in stagger-1">
       <div class="overflow-x-auto">
         <table class="data-table">
           <thead>
@@ -52,7 +55,15 @@ export async function renderInsumos() {
                 </td>
               </tr>
             `).join('') || `
-              <tr><td colspan="7" class="text-center py-12"><div class="empty-state"><i data-lucide="package" class="w-12 h-12 mx-auto mb-3"></i><p class="font-medium" style="color:var(--terracota-400)">No hay insumos</p></div></td></tr>
+              <tr><td colspan="7" class="text-center py-16">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                  </div>
+                  <h3>No hay insumos</h3>
+                  <p>Agrega insumos para calcular costos de materiales.</p>
+                </div>
+              </td></tr>
             `}
           </tbody>
         </table>
