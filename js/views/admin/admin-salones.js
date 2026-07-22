@@ -228,38 +228,385 @@ async function promptChangePlan(userId) {
 }
 
 async function showSalonDetails(userId) {
-  const { data: perfil } = await supabase.from('perfiles_negocio').select('*').eq('user_id', userId).maybeSingle();
-  const { data: sub } = await supabase.from('suscripciones').select('*, plan:planes_suscripcion(*)').eq('user_id', userId).maybeSingle();
-  const { count: ventas } = await supabase.from('ventas').select('*', { count: 'exact', head: true }).eq('user_id', userId);
-  const { count: servicios } = await supabase.from('servicios').select('*', { count: 'exact', head: true }).eq('user_id', userId);
-  const { count: insumos } = await supabase.from('insumos').select('*', { count: 'exact', head: true }).eq('user_id', userId);
+  const [
+    perfilRes,
+    subRes,
+    serviciosRes,
+    insumosRes,
+    costosRes,
+    equipoRes,
+    extrasRes,
+    ventasRes,
+  ] = await Promise.all([
+    supabase.from('perfiles_negocio').select('*').eq('user_id', userId).maybeSingle(),
+    supabase.from('suscripciones').select('*, plan:planes_suscripcion(*)').eq('user_id', userId).maybeSingle(),
+    supabase.from('servicios').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('insumos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('costos_fijos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('equipo_herramientas').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('extras').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('ventas').select('*').eq('user_id', userId).order('fecha', { ascending: false }).limit(50),
+  ]);
 
-  openModal(`
-    <div class="space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-          <p class="text-2xl font-bold text-terracota-600">${ventas || 0}</p>
-          <p class="text-xs text-gray-500 mt-1">Ventas registradas</p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-          <p class="text-2xl font-bold text-terracota-600">${servicios || 0}</p>
-          <p class="text-xs text-gray-500 mt-1">Servicios</p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-          <p class="text-2xl font-bold text-terracota-600">${insumos || 0}</p>
-          <p class="text-xs text-gray-500 mt-1">Insumos</p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-          <p class="text-2xl font-bold text-terracota-600">${escapeHtml(sub?.plan?.nombre) || 'N/A'}</p>
-          <p class="text-xs text-gray-500 mt-1">Plan actual</p>
-        </div>
+  const perfil = perfilRes.data;
+  const sub = subRes.data;
+  const servicios = serviciosRes.data || [];
+  const insumos = insumosRes.data || [];
+  const costos = costosRes.data || [];
+  const equipo = equipoRes.data || [];
+  const extras = extrasRes.data || [];
+  const ventas = ventasRes.data || [];
+
+  const plan = sub?.plan;
+  const estado = sub?.estado || 'sin_plan';
+  const estadoColors = {
+    activo: 'bg-green-50 text-green-700 border-green-200',
+    trial: 'bg-blue-50 text-blue-700 border-blue-200',
+    suspendido: 'bg-red-50 text-red-700 border-red-200',
+    cancelado: 'bg-gray-50 text-gray-500 border-gray-200',
+    sin_plan: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  };
+
+  const tabs = [
+    { id: 'perfil', label: 'Perfil', icon: 'user', count: null },
+    { id: 'servicios', label: 'Servicios', icon: 'scissors', count: servicios.length },
+    { id: 'insumos', label: 'Insumos', icon: 'package', count: insumos.length },
+    { id: 'costos', label: 'Costos Fijos', icon: 'receipt', count: costos.length },
+    { id: 'equipo', label: 'Equipo', icon: 'wrench', count: equipo.length },
+    { id: 'ventas', label: 'Ventas', icon: 'bar-chart-3', count: ventas.length },
+  ];
+
+  const headerHtml = `
+    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
+      <div class="w-12 h-12 rounded-xl bg-terracota-100 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="building-2" class="w-6 h-6 text-terracota-600"></i>
       </div>
-      <div class="text-sm text-gray-500 space-y-1">
-        <p><span class="font-medium text-gray-700">User ID:</span> ${userId}</p>
-        <p><span class="font-medium text-gray-700">Registro:</span> ${perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX') : 'N/A'}</p>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-bold text-lg text-gray-900 truncate">${escapeHtml(perfil?.nombre_salon) || 'Sin nombre'}</h3>
+        <p class="text-xs text-gray-400 font-mono">${escapeHtml(userId.slice(0, 12))}...</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${estadoColors[estado] || estadoColors.sin_plan}">${escapeHtml(estado)}</span>
+        ${plan ? `<span class="text-sm font-medium text-terracota-600">${escapeHtml(plan.nombre)} · $${plan.precio_mensual}/mes</span>` : '<span class="text-sm text-gray-400">Sin plan</span>'}
       </div>
     </div>
-  `, { title: escapeHtml(perfil?.nombre_salon) || 'Detalle del Salon' });
+  `;
+
+  const tabsHtml = tabs.map((t, i) => `
+    <button data-tab="${t.id}" class="salon-tab flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${i === 0 ? 'text-terracota-600 border-terracota-500 bg-terracota-50/50' : 'text-gray-400 border-transparent hover:text-gray-600'}">
+      <i data-lucide="${t.icon}" class="w-4 h-4"></i>
+      ${t.label}
+      ${t.count !== null ? `<span class="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-medium ${i === 0 ? 'bg-terracota-200 text-terracota-700' : 'bg-gray-100 text-gray-500'}">${t.count}</span>` : ''}
+    </button>
+  `).join('');
+
+  const contentHtml = `
+    <div id="salon-tab-content" class="min-h-[300px] max-h-[50vh] overflow-y-auto">
+      ${renderPerfilTab(perfil, sub, plan)}
+    </div>
+  `;
+
+  openModal(`
+    ${headerHtml}
+    <div class="salon-tabs flex items-center gap-1 border-b border-gray-100 -mx-6 px-6 overflow-x-auto">
+      ${tabsHtml}
+    </div>
+    ${contentHtml}
+  `, { title: '', wide: true });
+
+  const tabsContainer = document.querySelector('.salon-tabs');
+  const contentArea = document.getElementById('salon-tab-content');
+  const tabRenderers = {
+    perfil: () => renderPerfilTab(perfil, sub, plan),
+    servicios: () => renderServiciosTab(servicios),
+    insumos: () => renderInsumosTab(insumos),
+    costos: () => renderCostosTab(costos),
+    equipo: () => renderEquipoTab(equipo),
+    ventas: () => renderVentasTab(ventas),
+  };
+
+  tabsContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tab]');
+    if (!btn) return;
+    const tabId = btn.dataset.tab;
+
+    tabsContainer.querySelectorAll('[data-tab]').forEach(b => {
+      b.className = 'salon-tab flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors text-gray-400 border-transparent hover:text-gray-600';
+      const badge = b.querySelector('span');
+      if (badge) { badge.className = 'ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500'; }
+    });
+    btn.className = 'salon-tab flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors text-terracota-600 border-terracota-500 bg-terracota-50/50';
+    const badge = btn.querySelector('span');
+    if (badge) { badge.className = 'ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-medium bg-terracota-200 text-terracota-700'; }
+
+    contentArea.innerHTML = tabRenderers[tabId]();
+    if (window.lucide) lucide.createIcons();
+  });
+
+  if (window.lucide) lucide.createIcons();
 }
 
+function renderPerfilTab(perfil, sub, plan) {
+  const horasMes = perfil?.horas_mes || 0;
+  const tarifaMO = perfil?.tarifa_mano_obra || 0;
+  const moneda = perfil?.moneda || 'MXN';
+  const registro = perfil?.created_at ? new Date(perfil.created_at).toLocaleDateString('es-MX') : 'N/A';
 
+  return `
+    <div class="p-1 space-y-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-terracota-50 rounded-xl p-3 text-center">
+          <p class="text-lg font-bold text-terracota-600">${escapeHtml(plan?.nombre) || 'N/A'}</p>
+          <p class="text-xs text-gray-500 mt-0.5">Plan</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-3 text-center">
+          <p class="text-lg font-bold text-gray-900">$${tarifaMO}</p>
+          <p class="text-xs text-gray-500 mt-0.5">Tarifa MO/hr</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-3 text-center">
+          <p class="text-lg font-bold text-gray-900">${horasMes}</p>
+          <p class="text-xs text-gray-500 mt-0.5">Horas/mes</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-3 text-center">
+          <p class="text-lg font-bold text-gray-900">${escapeHtml(moneda)}</p>
+          <p class="text-xs text-gray-500 mt-0.5">Moneda</p>
+        </div>
+      </div>
+      <div class="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+        <h4 class="font-semibold text-gray-900 text-sm">Contacto</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div class="flex items-center gap-2 text-gray-600">
+            <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+            <span>${escapeHtml(perfil?.telefono) || '—'}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600">
+            <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+            <span>${escapeHtml(perfil?.email) || '—'}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600 sm:col-span-2">
+            <i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i>
+            <span>${escapeHtml(perfil?.direccion) || '—'}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600">
+            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+            <span>Registro: ${registro}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderServiciosTab(servicios) {
+  if (servicios.length === 0) {
+    return `
+      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+        <i data-lucide="scissors" class="w-10 h-10 mb-3 text-gray-300"></i>
+        <p class="text-sm font-medium">No hay servicios registrados</p>
+      </div>
+    `;
+  }
+
+  const rows = servicios.map(s => `
+    <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+      <td class="px-4 py-3">
+        <p class="font-medium text-gray-900">${escapeHtml(s.nombre) || 'Sin nombre'}</p>
+        <p class="text-xs text-gray-400 mt-0.5">${escapeHtml(s.descripcion) || ''}</p>
+      </td>
+      <td class="px-4 py-3 text-sm text-gray-700">$${s.precio || 0}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">${s.duracion_minutos || 0} min</td>
+      <td class="px-4 py-3">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${s.activo !== false ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}">
+          ${s.activo !== false ? 'Activo' : 'Inactivo'}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="p-1">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Servicio</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Precio</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Tiempo</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Estado</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderInsumosTab(insumos) {
+  if (insumos.length === 0) {
+    return `
+      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+        <i data-lucide="package" class="w-10 h-10 mb-3 text-gray-300"></i>
+        <p class="text-sm font-medium">No hay insumos registrados</p>
+      </div>
+    `;
+  }
+
+  const rows = insumos.map(i => `
+    <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+      <td class="px-4 py-3 text-sm font-medium text-gray-900">${escapeHtml(i.nombre) || 'Sin nombre'}</td>
+      <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(i.presentacion) || '—'}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">$${i.costo || 0}</td>
+      <td class="px-4 py-3">
+        <span class="text-sm font-medium ${i.stock === 0 ? 'text-red-600' : 'text-gray-700'}">${i.stock ?? '—'}</span>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="p-1">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Producto</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Presentación</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Costo</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Stock</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderCostosTab(costos) {
+  if (costos.length === 0) {
+    return `
+      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+        <i data-lucide="receipt" class="w-10 h-10 mb-3 text-gray-300"></i>
+        <p class="text-sm font-medium">No hay costos fijos registrados</p>
+      </div>
+    `;
+  }
+
+  const total = costos.reduce((sum, c) => sum + (c.costo_mensual || 0), 0);
+
+  const rows = costos.map(c => `
+    <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+      <td class="px-4 py-3 text-sm font-medium text-gray-900">${escapeHtml(c.concepto) || 'Sin concepto'}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">$${c.costo_mensual || 0}</td>
+      <td class="px-4 py-3">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${c.activo !== false ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}">
+          ${c.activo !== false ? 'Activo' : 'Inactivo'}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="p-1 space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-sm text-gray-500">${costos.length} concepto${costos.length !== 1 ? 's' : ''}</span>
+        <span class="text-sm font-semibold text-terracota-600">Total: $${total.toLocaleString()}/mes</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Concepto</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Costo mensual</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Estado</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderEquipoTab(equipo) {
+  if (equipo.length === 0) {
+    return `
+      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+        <i data-lucide="wrench" class="w-10 h-10 mb-3 text-gray-300"></i>
+        <p class="text-sm font-medium">No hay equipo registrado</p>
+      </div>
+    `;
+  }
+
+  const rows = equipo.map(e => {
+    const vidaUtil = e.vida_util_servicios || 0;
+    const costoServicio = vidaUtil > 0 ? ((e.costo_compra || 0) / vidaUtil).toFixed(2) : '—';
+    return `
+      <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+        <td class="px-4 py-3 text-sm font-medium text-gray-900">${escapeHtml(e.herramienta) || 'Sin nombre'}</td>
+        <td class="px-4 py-3 text-sm text-gray-700">$${e.costo_compra || 0}</td>
+        <td class="px-4 py-3 text-sm text-gray-700">${vidaUtil} srv</td>
+        <td class="px-4 py-3 text-sm text-gray-700">${costoServicio !== '—' ? '$' + costoServicio : '—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div class="p-1">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Herramienta</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Costo compra</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Vida útil (srv)</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Costo/servicio</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderVentasTab(ventas) {
+  if (ventas.length === 0) {
+    return `
+      <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+        <i data-lucide="bar-chart-3" class="w-10 h-10 mb-3 text-gray-300"></i>
+        <p class="text-sm font-medium">No hay ventas registradas</p>
+      </div>
+    `;
+  }
+
+  const totalIngresos = ventas.reduce((sum, v) => sum + (v.monto_cobrado || 0), 0);
+  const totalGanancia = ventas.reduce((sum, v) => sum + (v.ganancia || 0), 0);
+
+  const rows = ventas.map(v => {
+    const ganancia = v.ganancia || 0;
+    return `
+      <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+        <td class="px-4 py-3 text-sm text-gray-700">${v.fecha ? new Date(v.fecha).toLocaleDateString('es-MX') : '—'}</td>
+        <td class="px-4 py-3 text-sm text-gray-700">${escapeHtml(v.cliente_nombre) || '—'}</td>
+        <td class="px-4 py-3 text-sm text-gray-700">${escapeHtml(v.servicio_nombre) || '—'}</td>
+        <td class="px-4 py-3 text-sm font-medium text-gray-900">$${v.monto_cobrado || 0}</td>
+        <td class="px-4 py-3 text-sm font-medium ${ganancia >= 0 ? 'text-green-600' : 'text-red-600'}">$${ganancia}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div class="p-1 space-y-3">
+      <div class="flex items-center gap-6 px-1">
+        <span class="text-sm text-gray-500">${ventas.length} venta${ventas.length !== 1 ? 's' : ''} (últimas 50)</span>
+        <span class="text-sm font-semibold text-gray-700">Ingresos: $${totalIngresos.toLocaleString()}</span>
+        <span class="text-sm font-semibold ${totalGanancia >= 0 ? 'text-green-600' : 'text-red-600'}">Ganancia: $${totalGanancia.toLocaleString()}</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Fecha</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Cliente</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Servicio</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Cobrado</th>
+            <th class="text-left px-4 py-2.5 font-medium text-gray-500">Ganancia</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
